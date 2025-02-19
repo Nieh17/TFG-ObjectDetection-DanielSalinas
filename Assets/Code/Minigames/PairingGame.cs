@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class PairingGame : MonoBehaviour
 {
@@ -12,29 +14,94 @@ public class PairingGame : MonoBehaviour
         public string translatedWord;
     }
 
+
     public List<WordPair> wordPairs;
+
+    [Header("General Canvas")]
+    [SerializeField] GameObject generalCanvas;
+
+    [Header("Introduction")]
+    [SerializeField] GameObject introCanvas;
+
+    [Header("Game's Canvas")]
+    [SerializeField] GameObject gameCanvas;
+
+    [Header("Game's Objects")]
     public GameObject buttonPrefab;
     public Transform nativeColumn;
     public Transform translatedColumn;
 
+    [Header("End Game Canvas")]
+    [SerializeField] GameObject endPanel;
+
+    [Header("End Game's Canvas Texts")]
+    [SerializeField] TMP_Text accuracyTitle;
+    [SerializeField] TMP_Text accuracyText;
+    [SerializeField] TMP_Text timeText;
+    [SerializeField] TMP_Text xpText;
+
+
+    List<WordPair> selectedPairs;
     private Dictionary<Button, string> buttonDictionary = new Dictionary<Button, string>();
     private List<Button> originalButtons = new List<Button>();
     private List<Button> translatedButtons = new List<Button>();
-    private HashSet<Button> temporarilyDisabledButtons = new HashSet<Button>(); // Botones bloqueados temporalmente
-    private HashSet<Button> pairedButtons = new HashSet<Button>(); // Botones emparejados permanentemente
+    private HashSet<Button> temporarilyDisabledButtons = new HashSet<Button>();
+    private HashSet<Button> pairedButtons = new HashSet<Button>();
     private Button firstSelected = null;
 
     private const int maxButtons = 5;
     private const float verticalSpacing = 16f;
 
-    void Start()
+    private bool gameActive = false;
+    private float timer;
+    private int minutes;
+    private int seconds;
+
+    private int totalTries;
+    private int correctTries;
+    private float accuracyRate;
+
+    private int score;
+    private int totalXp;
+
+    void OnEnable()
     {
-        SetupGame();
+        gameActive = false;
+        timer = 0f;
+        minutes = 0;
+        seconds = 0;
+
+        totalTries = 0;
+        correctTries = 0;
+        accuracyRate = 0f;
+
+        score = 0;
+        totalXp = 0;
+
+        generalCanvas.SetActive(true);
+        introCanvas.SetActive(true);
     }
+
+    private void Update()
+    {
+        if (!gameActive) return;
+
+        timer += Time.deltaTime;
+    }
+
+
+    public void startGame()
+    {
+        introCanvas.SetActive(false);
+        gameCanvas.SetActive(true);
+        SetupGame();
+
+    }
+
 
     void SetupGame()
     {
-        List<WordPair> selectedPairs = new List<WordPair>(wordPairs);
+        selectedPairs = new List<WordPair>(wordPairs);
         if (selectedPairs.Count > maxButtons)
         {
             selectedPairs = selectedPairs.GetRange(0, maxButtons);
@@ -44,6 +111,8 @@ public class PairingGame : MonoBehaviour
 
         ShuffleButtons(originalButtons, nativeColumn);
         ShuffleButtons(translatedButtons, translatedColumn);
+
+        gameActive = true;
     }
 
     void CreateButtons(List<WordPair> selectedPairs)
@@ -52,6 +121,7 @@ public class PairingGame : MonoBehaviour
         translatedButtons.Clear();
         temporarilyDisabledButtons.Clear();
         pairedButtons.Clear();
+        buttonDictionary.Clear();
 
         for (int i = 0; i < selectedPairs.Count; i++)
         {
@@ -121,11 +191,20 @@ public class PairingGame : MonoBehaviour
                 DisableButton(btn, true);
                 pairedButtons.Add(firstSelected);
                 pairedButtons.Add(btn);
+
+                correctTries += 1;
+
+                score += 10;
+
+                CheckGameEnd();
             }
             else
             {
+                score -= 5;
                 firstSelected.GetComponent<Image>().color = Color.white;
             }
+
+            totalTries += 1;
 
             firstSelected = null;
             EnableAllButtons(); // Reactivar los botones bloqueados temporalmente
@@ -185,11 +264,59 @@ public class PairingGame : MonoBehaviour
         string wordA = buttonDictionary[a];
         string wordB = buttonDictionary[b];
 
-        return wordPairs.Exists(pair =>
+        return selectedPairs.Exists(pair =>
             (pair.nativeWord == wordA && pair.translatedWord == wordB) ||
             (pair.nativeWord == wordB && pair.translatedWord == wordA));
     }
+
+    void CheckGameEnd()
+    {
+        Debug.Log("Paired buttons count: "+pairedButtons.Count);
+        Debug.Log("Selected Pairs Size: " + selectedPairs.Count);
+        if (pairedButtons.Count == selectedPairs.Count * 2)
+        {
+            EndGame();
+        }
+    }
+
+    void EndGame()
+    {
+        gameActive = false;
+        endPanel.SetActive(true);
+
+        minutes = Mathf.FloorToInt(timer / 60);
+        seconds = Mathf.FloorToInt(timer % 60);
+
+        accuracyRate = (correctTries / totalTries) * 100f;
+        gameActive = false;
+        
+        totalXp = Mathf.CeilToInt(score / 10f);
+        if(totalXp < 0) totalXp = 1;
+
+        if (accuracyRate > 50) accuracyTitle.text = "Good";
+        else accuracyTitle.text = "Bad";
+        accuracyText.text = accuracyRate.ToString() + "%";
+        timeText.text = minutes + ":" + seconds.ToString("D2");
+        xpText.text = totalXp.ToString() + "XP";
+    }
+
+
+
+
+    public void returnToMainMenu(GameObject objectToActivate)
+    {
+        endPanel.SetActive(false);
+        gameCanvas.SetActive(false);
+        introCanvas.SetActive(true);
+        generalCanvas.SetActive(false);
+
+        gameObject.SetActive(false);
+
+        objectToActivate.SetActive(true);
+    }
 }
+
+
 
 // Extensión para mezclar listas
 public static class ListExtensions

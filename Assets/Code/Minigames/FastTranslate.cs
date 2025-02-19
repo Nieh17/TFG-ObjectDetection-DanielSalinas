@@ -12,45 +12,88 @@ public class FastTranslate : MonoBehaviour
         public string translatedWord;
     }
 
-    public List<WordPair> wordPairs; // Lista de palabras y sus traducciones
-    public Button[] optionButtons; // Botones de respuesta
-    public TMP_Text wordToTranslateText; // Texto de la palabra a traducir
-    public TMP_Text scoreText; // Texto de la puntuación
-    public TMP_Text timerText; // Texto del tiempo restante
-    public Slider timerSlider; // Slider de tiempo
-    public Image timerFillImage; // Imagen del relleno del slider
+    public List<WordPair> wordPairs;
+    public Button[] optionButtons;
 
-    private int score = 0;
-    private float timer = 30f; // Tiempo límite en segundos
-    private float maxTime = 30f; // Tiempo máximo (para calcular porcentaje)
-    private WordPair currentWord; // Palabra actual
-    private List<string> allTranslations = new List<string>(); // Lista de todas las traducciones
-    private bool gameActive = true;
 
-    void Start()
+    [Header("General Canvas")]
+    [SerializeField] GameObject generalCanvas;
+
+    [Header("Introduction")]
+    [SerializeField] GameObject introCanvas;
+
+    [Header("Game's Canvas")]
+    [SerializeField] GameObject gameCanvas;
+
+    [Header("Game's Canvas Texts")]
+    [SerializeField] TMP_Text wordToTranslateText;
+    [SerializeField] TMP_Text scoreText;
+    [SerializeField] TMP_Text timerText;
+
+    [Header("Slider")]
+    [SerializeField] Slider timerSlider;
+    [SerializeField] Image timerFillImage;
+
+    [Header("Time")]
+    [SerializeField] float maxTime = 30f;
+
+    [Header("End Game's Canvas")]
+    [SerializeField] GameObject endPanel;
+
+    [Header("End Game's Canvas Texts")]
+    [SerializeField] TMP_Text accuracyTitle;
+    [SerializeField] TMP_Text accuracyText;
+    [SerializeField] TMP_Text timeText;
+    [SerializeField] TMP_Text xpText;
+
+    private int score;
+    private float timer;
+    private float timeLeft;
+    private int minutes;
+    private int seconds;
+
+    private WordPair currentWord;
+    private List<WordPair> availableWordPairs;
+    private List<string> allTranslations = new List<string>();
+    private bool gameActive = false;
+
+    private int totalTries;
+    private int correctTries;
+    private float accuracyRate;
+    private int totalXp;
+    
+
+    void OnEnable()
     {
-        allTranslations.Clear();
-        foreach (var pair in wordPairs)
-        {
-            allTranslations.Add(pair.translatedWord);
-        }
+        score = 0;
+        timer = maxTime;
+        timeLeft = 0f;
+        minutes = 0;
+        seconds = 0;
 
-        // Configurar el slider de tiempo
-        timerSlider.maxValue = maxTime;
-        timerSlider.value = timer;
+        allTranslations = new List<string>();
+        gameActive = false;
 
-        NextRound();
+        totalTries = 0;
+        correctTries = 0;
+        accuracyRate = 0;
+        totalXp = 0;
+
+        endPanel.SetActive(false);
+        generalCanvas.SetActive(true);
+        introCanvas.SetActive(true);
+        timer = maxTime;
     }
 
     void Update()
     {
         if (!gameActive) return;
 
-        timer -= Time.deltaTime; // Reduce el tiempo en tiempo real
-        timerText.text = Mathf.Ceil(timer).ToString(); // Mostrar tiempo en enteros
-        timerSlider.value = timer; // Actualizar el slider
+        timer -= Time.deltaTime;
+        timerText.text = Mathf.Ceil(timer).ToString();
+        timerSlider.value = timer;
 
-        UpdateTimerColor(); // Cambiar color según el tiempo restante
+        UpdateTimerColor();
 
         if (timer <= 0)
         {
@@ -58,15 +101,39 @@ public class FastTranslate : MonoBehaviour
         }
     }
 
+    public void StartGame()
+    {
+        introCanvas.SetActive(false);
+        gameCanvas.SetActive(true);
+        Setup();
+    }
+
+    void Setup()
+    {
+        gameActive = true;
+        availableWordPairs = new List<WordPair>(wordPairs);
+
+        allTranslations.Clear();
+        foreach (var pair in wordPairs)
+        {
+            allTranslations.Add(pair.translatedWord);
+        }
+
+        timerSlider.maxValue = maxTime;
+        timerSlider.value = timer;
+
+        NextRound();
+    }
+
     void NextRound()
     {
-        if (wordPairs.Count == 0 || !gameActive)
+        if (availableWordPairs.Count == 0 || !gameActive)
         {
             EndGame();
             return;
         }
 
-        currentWord = wordPairs[Random.Range(0, wordPairs.Count)];
+        currentWord = availableWordPairs[Random.Range(0, availableWordPairs.Count)];
         wordToTranslateText.text = currentWord.nativeWord;
 
         foreach (var button in optionButtons)
@@ -101,21 +168,24 @@ public class FastTranslate : MonoBehaviour
 
         if (selectedWord == currentWord.translatedWord)
         {
+            correctTries += 1;
             score += 10;
             scoreText.text = score.ToString();
-            wordPairs.Remove(currentWord);
+            availableWordPairs.Remove(currentWord);
             NextRound();
         }
         else
         {
             score -= 5; 
             scoreText.text = score.ToString();
-            timer -= 3;
+            //timer -= 3;
             timerText.text = Mathf.Ceil(timer).ToString();
             timerSlider.value = timer;
             UpdateTimerColor();
             button.interactable = false;
         }
+
+        totalTries += 1;
     }
 
     void UpdateTimerColor()
@@ -136,7 +206,37 @@ public class FastTranslate : MonoBehaviour
 
     void EndGame()
     {
+        endPanel.SetActive(true);
+
+        timeLeft = maxTime - timer;
+        minutes = Mathf.FloorToInt(timeLeft / 60);
+        seconds = Mathf.FloorToInt(timeLeft % 60);
+
+        accuracyRate = (correctTries / totalTries) * 100f;
         gameActive = false;
+        totalXp = Mathf.CeilToInt(score / 10f);
+
+
+        if (accuracyRate > 50) accuracyTitle.text = "Good";
+        else accuracyTitle.text = "Bad";
+        accuracyText.text = accuracyRate.ToString()+"%"; 
+        timeText.text = minutes+":"+seconds.ToString("D2");
+        xpText.text = totalXp.ToString()+"XP";
+
         Debug.Log("Juego terminado. Puntuación final: " + score);
+    }
+
+    public void returnToMainMenu(GameObject objectToActivate)
+    {
+        scoreText.text = "0";
+
+        endPanel.SetActive(false);
+        gameCanvas.SetActive(false);
+        introCanvas.SetActive(true);
+        generalCanvas.SetActive(false);
+
+        gameObject.SetActive(false);
+
+        objectToActivate.SetActive(true);
     }
 }
