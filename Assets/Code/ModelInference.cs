@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Barracuda;
 using System.Collections.Generic;
 using TMPro;
+using System.Xml.Schema;
 
 public class ModelInference : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class ModelInference : MonoBehaviour
     // Función para predecir usando el modelo cargado
     public void Predict(Texture2D inputImage)
     {
+        float startTime = Time.realtimeSinceStartup;
         // Convertir la imagen a Tensor
         Tensor tensor = new Tensor(inputImage, channels: 3);
 
@@ -34,13 +36,17 @@ public class ModelInference : MonoBehaviour
         // Obtener el índice de la clase con la mayor probabilidad
         int predictedClass = output.ArgMax()[0];
 
+
+        float endTime = Time.realtimeSinceStartup;
+        Debug.Log("Total time Prediction: "+ (endTime-startTime));
+
         Debug.Log("PREDICTED CLASS: "+predictedClass);
 
         // Obtener el nombre de la clase correspondiente
         string predictedClassName = classLabels[predictedClass];
 
         // Mostrar la predicción
-        Debug.Log($"Predicción: {predictedClassName}");
+        Debug.Log("Prediction: "+predictedClassName);
         predictionText.text = predictedClassName;
 
         tensor.Dispose();
