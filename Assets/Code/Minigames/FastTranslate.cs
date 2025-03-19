@@ -212,7 +212,7 @@ public class FastTranslate : MonoBehaviour
         minutes = Mathf.FloorToInt(timeLeft / 60);
         seconds = Mathf.FloorToInt(timeLeft % 60);
 
-        accuracyRate = (correctTries / totalTries) * 100f;
+        accuracyRate = ((float)correctTries / totalTries) * 100f;
         gameActive = false;
         totalXp = Mathf.CeilToInt(score / 10f);
 

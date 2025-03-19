@@ -287,7 +287,7 @@ public class PairingGame : MonoBehaviour
         minutes = Mathf.FloorToInt(timer / 60);
         seconds = Mathf.FloorToInt(timer % 60);
 
-        accuracyRate = (correctTries / totalTries) * 100f;
+        accuracyRate = ((float)correctTries / totalTries) * 100f;
         gameActive = false;
         
         totalXp = Mathf.CeilToInt(score / 10f);

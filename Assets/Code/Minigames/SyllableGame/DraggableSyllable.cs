@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -11,6 +12,9 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private Vector3 startPosition;
     public TextMeshProUGUI syllableText;
     private RawImage syllableImage;
+
+    public static event UnityAction OnSyllablePlacedUncorrectly;
+
 
     private void Awake()
     {
@@ -55,6 +59,8 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
             transform.SetParent(originalParent);
             transform.localPosition = startPosition;
             SetWhite();
+
+            OnSyllablePlacedUncorrectly?.Invoke();
         }
     }
 
@@ -63,7 +69,6 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
     {
         if (syllableImage != null)
         {
-            Debug.Log("Estoy en el color verde");
             syllableImage.color = Color.green; // Cambiar el color a verde
         }
     }
@@ -73,7 +78,6 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
     {
         if (syllableImage != null)
         {
-            Debug.Log("Estoy en el color blanco");
             syllableImage.color = Color.white; // Cambiar el color a blanco
         }
     }

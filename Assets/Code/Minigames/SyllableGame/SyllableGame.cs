@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
@@ -7,11 +8,27 @@ using UnityEngine.SocialPlatforms.Impl;
 
 public class SyllableGame : MonoBehaviour
 {
+    [System.Serializable]
+    public class WordPair
+    {
+        public string nativeWord;
+        public string translatedWord;
+    }
+
+
+    public List<WordPair> wordList;
+
+    private Queue<WordPair> wordsToPlay;
+    private WordPair currentWord;
+
+    private int maxWords = 5;
+
+
+
     public GameObject syllablePrefab;
     public GameObject dropSlotPrefab;
     public Transform syllableSpawnZone;
     public Transform dropSlotZone;
-    public string wordToSplit;
 
     private float spacing = 250f;  // Espaciado horizontal entre sílabas y drop slots
     private float lineHeight = 200f; // Separación entre líneas en el eje Y
@@ -29,6 +46,9 @@ public class SyllableGame : MonoBehaviour
 
     [Header("Game's Canvas")]
     [SerializeField] GameObject gameCanvas;
+
+    [Header("Game's Objects")]
+    [SerializeField] TMP_Text nativeWordText;
 
     [Header("End Game's Canvas")]
     [SerializeField] GameObject endPanel;
@@ -58,6 +78,9 @@ public class SyllableGame : MonoBehaviour
         // Suscribirse al evento de DropSlot
         DropSlot.OnSyllablePlacedCorrectly += CheckWinCondition;
 
+        // Suscribirse al evento de DraggableSyllable
+        DraggableSyllable.OnSyllablePlacedUncorrectly += AddTotalTries;
+
         gameActive = false;
         timer = 0f;
         minutes = 0;
@@ -78,6 +101,8 @@ public class SyllableGame : MonoBehaviour
     {
         // Desuscribirse del evento de DropSlot para evitar referencias nulas
         DropSlot.OnSyllablePlacedCorrectly -= CheckWinCondition;
+
+        DraggableSyllable.OnSyllablePlacedUncorrectly -= AddTotalTries;
     }
 
     private void Start()
@@ -90,7 +115,11 @@ public class SyllableGame : MonoBehaviour
     {
         introCanvas.SetActive(false);
         gameCanvas.SetActive(true);
-        GenerateGame();
+
+
+
+        PrepareWordQueue();
+        LoadNextWord();
 
     }
 
@@ -101,7 +130,31 @@ public class SyllableGame : MonoBehaviour
         timer += Time.deltaTime;
     }
 
-    private void GenerateGame()
+    private void PrepareWordQueue()
+    {
+        List<WordPair> shuffledList = wordList.OrderBy(w => Random.value).ToList();
+
+        wordsToPlay = new Queue<WordPair>(
+            shuffledList.Where(w => GetSyllables(w.translatedWord).Count > 1).Take(maxWords)
+        );
+    }
+
+    private void LoadNextWord()
+    {
+        if (wordsToPlay.Count == 0)
+        {
+            EndGame();
+            return;
+        }
+
+        currentWord = wordsToPlay.Dequeue();
+        nativeWordText.text = currentWord.nativeWord;
+
+        GenerateGame(currentWord.translatedWord);
+    }
+
+
+    private void GenerateGame(string wordToSplit)
     {
         gameActive = true;
 
@@ -109,6 +162,9 @@ public class SyllableGame : MonoBehaviour
 
         // Generar sílabas desordenadas en la zona inicial
         List<string> shuffledSyllables = syllables.OrderBy(s => Random.value).ToList();
+
+        ClearPreviousElements();
+
         GenerateSyllables(shuffledSyllables, syllableSpawnZone);
 
         // Generar los drop slots en el orden correcto
@@ -169,6 +225,8 @@ public class SyllableGame : MonoBehaviour
         List<string> syllables = new List<string>();
 
         // Expresión regular para separar sílabas (básico para español e inglés)
+        //string pattern = @"([^aeiou]*[aeiou]+(?:[mnrls]?))"; //español
+        //string pattern = @"[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$|[^aeiouy](?=[^aeiouy]))?"; //inglés
         string pattern = @"(kya|kyu|kyo|gya|gyu|gyo|sha|shu|sho|ja|ju|jo|cha|chu|cho|nya|nyu|nyo|hya|hyu|hyo|"
                         + @"bya|byu|byo|pya|pyu|pyo|mya|myu|myo|rya|ryu|ryo|"
                         + @"kk|ss|tt|pp|"
@@ -193,8 +251,18 @@ public class SyllableGame : MonoBehaviour
         return syllables;
     }
 
+    private void ClearPreviousElements()
+    {
+        foreach (Transform child in syllableSpawnZone) Destroy(child.gameObject);
+        foreach (Transform child in dropSlotZone) Destroy(child.gameObject);
+    }
+
     private void CheckWinCondition()
     {
+        correctTries += 1;
+        score += 10;
+        totalTries += 1;
+        
         // Verifica si todos los drop slots están llenos correctamente
         foreach (DropSlot slot in dropSlots)
         {
@@ -205,18 +273,27 @@ public class SyllableGame : MonoBehaviour
         }
 
         // Si llegamos aquí, el jugador ha colocado todas las sílabas correctamente
-        EndGame();
+        LoadNextWord();
     }
+
+    private void AddTotalTries()
+    {
+        totalTries += 1;
+        score -= 5;
+    }
+
+
 
     private void EndGame()
     {
+        gameActive = false;
+
         endPanel.SetActive(true);
 
         minutes = Mathf.FloorToInt(timer / 60);
         seconds = Mathf.FloorToInt(timer % 60);
 
-        accuracyRate = (correctTries / totalTries) * 100f;
-        gameActive = false;
+        accuracyRate = ((float)correctTries / totalTries) * 100f;
 
         totalXp = Mathf.CeilToInt(score / 10f);
         if (totalXp < 0) totalXp = 1;
