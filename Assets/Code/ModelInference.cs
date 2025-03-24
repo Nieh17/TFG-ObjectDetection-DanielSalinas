@@ -21,7 +21,7 @@ public class ModelInference : MonoBehaviour
     }
 
     // Función para predecir usando el modelo cargado
-    public void Predict(Texture2D inputImage)
+    public string Predict(Texture2D inputImage)
     {
         float startTime = Time.realtimeSinceStartup;
         // Convertir la imagen a Tensor
@@ -50,6 +50,8 @@ public class ModelInference : MonoBehaviour
         predictionText.text = predictedClassName;
 
         tensor.Dispose();
+
+        return predictedClassName;
     }
 
     // Limpiar cuando ya no se necesita el worker
