@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class LifeManager : MonoBehaviour
@@ -11,10 +10,17 @@ public class LifeManager : MonoBehaviour
     public int regenTimeMinutes = 1;
 
     private const string LivesKey = "lives";
-    private const string LastLifeLostTimeKey = "lastLifeLostTime";
+    private const string LifeLossTimesKey = "lifeLossTimes";
+
+    public Transform heartsContainer;
+    private List<GameObject> aliveHearts;
+    private List<DateTime> lifeLossTimes = new List<DateTime>();
 
     private void Start()
     {
+        aliveHearts = new List<GameObject>();
+
+        FindHearts();
         LoadLives();
         UpdateLivesUI();
 
@@ -29,15 +35,12 @@ public class LifeManager : MonoBehaviour
         if (currentLives > 0)
         {
             currentLives--;
-            DateTime nextLifeTime = DateTime.Now.AddMinutes(regenTimeMinutes);
+            lifeLossTimes.Add(DateTime.Now);
 
-            PlayerPrefs.SetInt(LivesKey, currentLives);
-            PlayerPrefs.SetString(LastLifeLostTimeKey, DateTime.Now.ToBinary().ToString());
-            PlayerPrefs.Save();
+            SaveLives();
             UpdateLivesUI();
 
-            Debug.Log("Vida perdida. Próxima vida en: " + nextLifeTime.ToString("HH:mm:ss"));
-
+            Debug.Log("Vida perdida. Próxima vida en: " + DateTime.Now.AddMinutes(regenTimeMinutes).ToString("HH:mm:ss"));
 
             if (currentLives < maxLives)
             {
@@ -48,23 +51,18 @@ public class LifeManager : MonoBehaviour
 
     private IEnumerator RegenerateLives()
     {
-        while (currentLives < maxLives)
+        while (currentLives < maxLives && lifeLossTimes.Count > 0)
         {
-            long lastLifeLostTime = Convert.ToInt64(PlayerPrefs.GetString(LastLifeLostTimeKey, "0"));
-            DateTime lastLifeLost = DateTime.FromBinary(lastLifeLostTime);
-            TimeSpan timePassed = DateTime.Now - lastLifeLost;
-
-            int livesRecovered = (int)(timePassed.TotalMinutes / regenTimeMinutes);
-
-            if (livesRecovered > 0)
+            DateTime now = DateTime.Now;
+            while (lifeLossTimes.Count > 0 && (now - lifeLossTimes[0]).TotalMinutes >= regenTimeMinutes)
             {
-                currentLives = Mathf.Min(currentLives + livesRecovered, maxLives);
-                PlayerPrefs.SetInt(LivesKey, currentLives);
-                PlayerPrefs.Save();
+                currentLives++;
+                lifeLossTimes.RemoveAt(0);
+                SaveLives();
                 UpdateLivesUI();
             }
 
-            yield return new WaitUntil(() => (DateTime.Now - lastLifeLost).TotalMinutes >= regenTimeMinutes);
+            yield return new WaitForSeconds(1);
         }
     }
 
@@ -72,21 +70,67 @@ public class LifeManager : MonoBehaviour
     {
         currentLives = PlayerPrefs.GetInt(LivesKey, maxLives);
 
-        long lastLifeLostTime = Convert.ToInt64(PlayerPrefs.GetString(LastLifeLostTimeKey, "0"));
-        DateTime lastLifeLost = DateTime.FromBinary(lastLifeLostTime);
-        TimeSpan timePassed = DateTime.Now - lastLifeLost;
+        string lossTimesString = PlayerPrefs.GetString(LifeLossTimesKey, "");
+        lifeLossTimes.Clear();
 
-        int livesRecovered = (int)(timePassed.TotalMinutes / regenTimeMinutes);
-        if (livesRecovered > 0)
+        if (!string.IsNullOrEmpty(lossTimesString))
         {
-            currentLives = Mathf.Min(currentLives + livesRecovered, maxLives);
-            PlayerPrefs.SetInt(LivesKey, currentLives);
-            PlayerPrefs.Save();
+            string[] timeStrings = lossTimesString.Split('|');
+            foreach (string timeString in timeStrings)
+            {
+                if (long.TryParse(timeString, out long binaryTime))
+                {
+                    lifeLossTimes.Add(DateTime.FromBinary(binaryTime));
+                }
+            }
         }
+
+        DateTime now = DateTime.Now;
+        int recoveredLives = 0;
+
+        while (lifeLossTimes.Count > 0 && (now - lifeLossTimes[0]).TotalMinutes >= regenTimeMinutes)
+        {
+            lifeLossTimes.RemoveAt(0);
+            recoveredLives++;
+        }
+
+        currentLives = Mathf.Min(currentLives + recoveredLives, maxLives);
+
+        SaveLives();
+    }
+
+    private void SaveLives()
+    {
+        PlayerPrefs.SetInt(LivesKey, currentLives);
+
+        string lossTimesString = string.Join("|", lifeLossTimes.ConvertAll(time => time.ToBinary().ToString()));
+        PlayerPrefs.SetString(LifeLossTimesKey, lossTimesString);
+
+        PlayerPrefs.Save();
     }
 
     private void UpdateLivesUI()
     {
         Debug.Log("Vidas actuales: " + currentLives);
+
+        for (int i = 0; i < aliveHearts.Count; i++)
+        {
+            aliveHearts[i].SetActive(i < currentLives);
+        }
+    }
+
+    void FindHearts()
+    {
+        aliveHearts.Clear();
+
+        foreach (Transform child in heartsContainer)
+        {
+            if (child.CompareTag("AliveHeart"))
+            {
+                aliveHearts.Add(child.gameObject);
+            }
+        }
+
+        aliveHearts.Sort((a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
     }
 }
