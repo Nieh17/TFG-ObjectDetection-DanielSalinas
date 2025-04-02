@@ -11,18 +11,18 @@ public class LifeManager : MonoBehaviour
     public int regenTimeMinutes = 1;
 
     private const string LivesKey = "lives";
-    private const string NextLifeTimeKey = "nextLifeTime";
+    private const string NextLivesKey = "nextLives";
 
     public Transform heartsContainer;
     public TextMeshProUGUI timerText;
 
     private List<GameObject> aliveHearts;
-    private DateTime nextLifeTime;
+    private Queue<DateTime> nextLifeTimes;
+
 
     private void Start()
     {
         aliveHearts = new List<GameObject>();
-
         FindHearts();
         LoadLives();
         UpdateLivesUI();
@@ -34,22 +34,22 @@ public class LifeManager : MonoBehaviour
         }
     }
 
+
     public void LoseLife()
     {
         if (currentLives > 0)
         {
             currentLives--;
 
-            if (currentLives < maxLives && nextLifeTime == DateTime.MinValue)
-            {
-                nextLifeTime = DateTime.Now.AddMinutes(regenTimeMinutes);
-                PlayerPrefs.SetString(NextLifeTimeKey, nextLifeTime.ToBinary().ToString());
-            }
+            // Calcular la nueva regeneración correctamente
+            DateTime lastRegenTime = nextLifeTimes.Count > 0 ? nextLifeTimes.Peek() : DateTime.Now;
+            DateTime newRegenTime = lastRegenTime.AddMinutes(regenTimeMinutes);
+            nextLifeTimes.Enqueue(newRegenTime);
 
             SaveLives();
             UpdateLivesUI();
 
-            Debug.Log("Vida perdida. Próxima vida en: " + nextLifeTime.ToString("HH:mm:ss"));
+            Debug.Log("Vida perdida. Próxima vida en: " + newRegenTime.ToString("HH:mm:ss"));
 
             if (currentLives < maxLives)
             {
@@ -61,25 +61,15 @@ public class LifeManager : MonoBehaviour
 
     private IEnumerator RegenerateLives()
     {
-        while (currentLives < maxLives)
+        while (currentLives < maxLives && nextLifeTimes.Count > 0)
         {
-            if (nextLifeTime == DateTime.MinValue) yield break;
-
+            DateTime nextLifeTime = nextLifeTimes.Peek();
             TimeSpan timeUntilNextLife = nextLifeTime - DateTime.Now;
 
             if (timeUntilNextLife.TotalSeconds <= 0)
             {
                 currentLives++;
-                if (currentLives < maxLives)
-                {
-                    nextLifeTime = DateTime.Now.AddMinutes(regenTimeMinutes);
-                    PlayerPrefs.SetString(NextLifeTimeKey, nextLifeTime.ToBinary().ToString());
-                }
-                else
-                {
-                    nextLifeTime = DateTime.MinValue;
-                    PlayerPrefs.DeleteKey(NextLifeTimeKey);
-                }
+                nextLifeTimes.Dequeue(); // Eliminamos la vida regenerada
 
                 SaveLives();
                 UpdateLivesUI();
@@ -91,22 +81,14 @@ public class LifeManager : MonoBehaviour
 
     private IEnumerator UpdateTimerText()
     {
-        while (currentLives < maxLives)
+        while (currentLives < maxLives && nextLifeTimes.Count > 0)
         {
-            if (nextLifeTime == DateTime.MinValue)
-            {
-                timerText.gameObject.SetActive(false);
-                yield break;
-            }
-
+            DateTime nextLifeTime = nextLifeTimes.Peek();
             TimeSpan remainingTime = nextLifeTime - DateTime.Now;
 
             if (remainingTime.TotalSeconds > 0)
             {
-                int minutes = Mathf.FloorToInt((float)remainingTime.TotalMinutes);
-                int seconds = remainingTime.Seconds;
-
-                timerText.text = $"Siguiente vida en: {minutes:D2}:{seconds:D2}";
+                timerText.text = $"Siguiente vida en: {remainingTime.Minutes:D2}:{remainingTime.Seconds:D2}";
                 timerText.gameObject.SetActive(true);
             }
             else
@@ -123,15 +105,23 @@ public class LifeManager : MonoBehaviour
     private void LoadLives()
     {
         currentLives = PlayerPrefs.GetInt(LivesKey, maxLives);
+        nextLifeTimes = new Queue<DateTime>();
 
-        long nextLifeBinary = Convert.ToInt64(PlayerPrefs.GetString(NextLifeTimeKey, "0"));
-        nextLifeTime = nextLifeBinary != 0 ? DateTime.FromBinary(nextLifeBinary) : DateTime.MinValue;
-
-        DateTime now = DateTime.Now;
-        while (currentLives < maxLives && nextLifeTime != DateTime.MinValue && now >= nextLifeTime)
+        string savedTimes = PlayerPrefs.GetString(NextLivesKey, "");
+        if (!string.IsNullOrEmpty(savedTimes))
         {
-            currentLives++;
-            nextLifeTime = currentLives < maxLives ? now.AddMinutes(regenTimeMinutes) : DateTime.MinValue;
+            string[] timeStrings = savedTimes.Split('|');
+            foreach (string timeStr in timeStrings)
+            {
+                if (long.TryParse(timeStr, out long binaryTime))
+                {
+                    DateTime regenTime = DateTime.FromBinary(binaryTime);
+                    if (regenTime > DateTime.Now)
+                        nextLifeTimes.Enqueue(regenTime);
+                    else
+                        currentLives++; // Si ya pasó el tiempo, recuperamos la vida
+                }
+            }
         }
 
         SaveLives();
@@ -141,13 +131,14 @@ public class LifeManager : MonoBehaviour
     {
         PlayerPrefs.SetInt(LivesKey, currentLives);
 
-        if (nextLifeTime != DateTime.MinValue)
+        if (nextLifeTimes.Count > 0)
         {
-            PlayerPrefs.SetString(NextLifeTimeKey, nextLifeTime.ToBinary().ToString());
+            string serializedTimes = string.Join("|", Array.ConvertAll(nextLifeTimes.ToArray(), dt => dt.ToBinary().ToString()));
+            PlayerPrefs.SetString(NextLivesKey, serializedTimes);
         }
         else
         {
-            PlayerPrefs.DeleteKey(NextLifeTimeKey);
+            PlayerPrefs.DeleteKey(NextLivesKey);
         }
 
         PlayerPrefs.Save();
@@ -175,7 +166,6 @@ public class LifeManager : MonoBehaviour
     void FindHearts()
     {
         aliveHearts.Clear();
-
         foreach (Transform child in heartsContainer)
         {
             if (child.CompareTag("AliveHeart"))
@@ -183,7 +173,6 @@ public class LifeManager : MonoBehaviour
                 aliveHearts.Add(child.gameObject);
             }
         }
-
         aliveHearts.Sort((a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
     }
 }
