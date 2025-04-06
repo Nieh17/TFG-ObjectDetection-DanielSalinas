@@ -49,6 +49,7 @@ public class SyllableGame : MonoBehaviour
 
     [Header("Game's Objects")]
     [SerializeField] TMP_Text nativeWordText;
+    [SerializeField] TMP_Text currentLivesText;
 
     [Header("End Game's Canvas")]
     [SerializeField] GameObject endPanel;
@@ -280,6 +281,10 @@ public class SyllableGame : MonoBehaviour
     {
         totalTries += 1;
         score -= 5;
+
+        //TODO RESTAR VIDA
+        LifeManager.instance.LoseLife();
+        currentLivesText.text = LifeManager.instance.currentLives.ToString();
     }
 
 
@@ -307,6 +312,9 @@ public class SyllableGame : MonoBehaviour
 
     public void returnToMainMenu(GameObject objectToActivate)
     {
+        LevelManager.Instance.AddXP(totalXp);
+
+
         endPanel.SetActive(false);
         gameCanvas.SetActive(false);
         introCanvas.SetActive(true);

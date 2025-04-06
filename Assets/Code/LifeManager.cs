@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 
 public class LifeManager : MonoBehaviour
 {
+    public static LifeManager instance { get; private set; }
+
     public int maxLives = 5;
     public int currentLives;
     public int regenTimeMinutes = 1;
@@ -19,7 +22,18 @@ public class LifeManager : MonoBehaviour
     private List<GameObject> aliveHearts;
     private Queue<DateTime> nextLifeTimes;
 
-
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     private void Start()
     {
         aliveHearts = new List<GameObject>();

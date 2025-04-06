@@ -30,6 +30,7 @@ public class PairingGame : MonoBehaviour
     public GameObject buttonPrefab;
     public Transform nativeColumn;
     public Transform translatedColumn;
+    [SerializeField] TMP_Text currentLivesText;
 
     [Header("End Game Canvas")]
     [SerializeField] GameObject endPanel;
@@ -202,6 +203,10 @@ public class PairingGame : MonoBehaviour
             {
                 score -= 5;
                 firstSelected.GetComponent<Image>().color = Color.white;
+
+                //TODO RESTAR VIDA
+                LifeManager.instance.LoseLife();
+                currentLivesText.text = LifeManager.instance.currentLives.ToString();
             }
 
             totalTries += 1;
@@ -305,6 +310,9 @@ public class PairingGame : MonoBehaviour
 
     public void returnToMainMenu(GameObject objectToActivate)
     {
+        LevelManager.Instance.AddXP(totalXp);
+
+
         endPanel.SetActive(false);
         gameCanvas.SetActive(false);
         introCanvas.SetActive(true);

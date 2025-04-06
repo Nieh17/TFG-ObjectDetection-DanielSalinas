@@ -29,6 +29,8 @@ public class FastTranslate : MonoBehaviour
     [SerializeField] TMP_Text wordToTranslateText;
     [SerializeField] TMP_Text scoreText;
     [SerializeField] TMP_Text timerText;
+    [SerializeField] TMP_Text currentLivesText;
+
 
     [Header("Slider")]
     [SerializeField] Slider timerSlider;
@@ -183,6 +185,10 @@ public class FastTranslate : MonoBehaviour
             timerSlider.value = timer;
             UpdateTimerColor();
             button.interactable = false;
+
+            //TODO RESTAR VIDA
+            LifeManager.instance.LoseLife();
+            currentLivesText.text = LifeManager.instance.currentLives.ToString();
         }
 
         totalTries += 1;
@@ -228,6 +234,9 @@ public class FastTranslate : MonoBehaviour
 
     public void returnToMainMenu(GameObject objectToActivate)
     {
+
+        LevelManager.Instance.AddXP(totalXp);
+
         scoreText.text = "0";
 
         endPanel.SetActive(false);
