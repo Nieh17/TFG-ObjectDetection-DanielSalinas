@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Learning_Content Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: Learning_Content
+  m_TableCollectionNameGuidString: 16e243364a4ac894eb039e1598075f5a
+  m_Entries:
+  - m_Id: 636673675264
+    m_Key: "avi\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 780227923968
+    m_Key: "bal\xF3n de baloncesto"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 796413743104
+    m_Key: "bol\xEDgrafo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 810481438720
+    m_Key: coche
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1140774490112
+    m_Key: contenedor de basura
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1171023810560
+    m_Key: elefante
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1189994647552
+    m_Key: farola
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1206214021120
+    m_Key: flamenco
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1215437295616
+    m_Key: gato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1243618824192
+    m_Key: mesa
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1257426472960
+    m_Key: metro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1272265920512
+    m_Key: motocicleta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1277655601152
+    m_Key: nube
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1293770117120
+    m_Key: paloma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1310652190720
+    m_Key: perro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1325575524352
+    m_Key: puerta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1338997297152
+    m_Key: "\xE1rbol"
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 1346184302916796493
+  references:
+    version: 2
+    RefIds:
+    - rid: 1346184302916796493
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1745440680477

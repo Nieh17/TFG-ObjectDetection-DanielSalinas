@@ -17,7 +17,8 @@ public class LifeManager : MonoBehaviour
     private const string NextLivesKey = "nextLives";
 
     public Transform heartsContainer;
-    public TextMeshProUGUI timerText;
+    public TextMeshProUGUI timerStringText;
+    public TextMeshProUGUI timerNumberText;
 
     private List<GameObject> aliveHearts;
     private Queue<DateTime> nextLifeTimes;
@@ -102,18 +103,22 @@ public class LifeManager : MonoBehaviour
 
             if (remainingTime.TotalSeconds > 0)
             {
-                timerText.text = $"Siguiente vida en: {remainingTime.Minutes:D2}:{remainingTime.Seconds:D2}";
-                timerText.gameObject.SetActive(true);
+                timerStringText.gameObject.SetActive(true);
+
+                timerNumberText.text = $"{remainingTime.Minutes:D2}:{remainingTime.Seconds:D2}";
+                timerNumberText.gameObject.SetActive(true);
             }
             else
             {
-                timerText.gameObject.SetActive(false);
+                timerNumberText.gameObject.SetActive(false);
+                timerStringText.gameObject.SetActive(false);
             }
 
             yield return new WaitForSeconds(1);
         }
 
-        timerText.gameObject.SetActive(false);
+        timerStringText.gameObject.SetActive(false);
+        timerNumberText.gameObject.SetActive(false);
     }
 
     private void LoadLives()
@@ -173,7 +178,7 @@ public class LifeManager : MonoBehaviour
         }
         else
         {
-            timerText.gameObject.SetActive(false);
+            timerNumberText.gameObject.SetActive(false);
         }
     }
 

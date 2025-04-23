@@ -1,0 +1,72 @@
+{
+  "labels": [
+    {
+      "key": "avión",
+      "value": 0
+    },
+    {
+      "key": "balón de baloncesto",
+      "value": 1
+    },
+    {
+      "key": "bolígrafo",
+      "value": 2
+    },
+    {
+      "key": "coche",
+      "value": 3
+    },
+    {
+      "key": "contenedor de basura",
+      "value": 4
+    },
+    {
+      "key": "elefante",
+      "value": 5
+    },
+    {
+      "key": "farola",
+      "value": 6
+    },
+    {
+      "key": "flamenco",
+      "value": 7
+    },
+    {
+      "key": "gato",
+      "value": 8
+    },
+    {
+      "key": "mesa",
+      "value": 9
+    },
+    {
+      "key": "metro",
+      "value": 10
+    },
+    {
+      "key": "motocicleta",
+      "value": 11
+    },
+    {
+      "key": "nube",
+      "value": 12
+    },
+    {
+      "key": "paloma",
+      "value": 13
+    },
+    {
+      "key": "perro",
+      "value": 14
+    },
+    {
+      "key": "puerta",
+      "value": 15
+    },
+    {
+      "key": "árbol",
+      "value": 16
+    }
+  ]
+}

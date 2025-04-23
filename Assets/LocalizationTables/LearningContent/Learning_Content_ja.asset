@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Learning_Content_ja
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: ja
+  m_SharedData: {fileID: 11400000, guid: 16e243364a4ac894eb039e1598075f5a, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1338997297152
+    m_Localized: ki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1325575524352
+    m_Localized: doa
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1310652190720
+    m_Localized: inu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1293770117120
+    m_Localized: hato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1277655601152
+    m_Localized: kumo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1272265920512
+    m_Localized: baiku
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1257426472960
+    m_Localized: chikatetsu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1243618824192
+    m_Localized: teeburu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1215437295616
+    m_Localized: neko
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1206214021120
+    m_Localized: furamenko
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1189994647552
+    m_Localized: tentoufu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1171023810560
+    m_Localized: zou
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1140774490112
+    m_Localized: gomibako
+    m_Metadata:
+      m_Items: []
+  - m_Id: 810481438720
+    m_Localized: kuruma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 796413743104
+    m_Localized: pen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 780227923968
+    m_Localized: basukettobouru
+    m_Metadata:
+      m_Items: []
+  - m_Id: 636673675264
+    m_Localized: hikouki
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

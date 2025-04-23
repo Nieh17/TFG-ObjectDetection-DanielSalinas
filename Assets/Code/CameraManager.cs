@@ -57,9 +57,8 @@ public class CameraManager : MonoBehaviour
                             aspectRatioFitter.aspectRatio = (float)texture.width / texture.height;
                         }
 
-                        string predictedClass = modelInference.Predict(texture);
+                        StartCoroutine(HandlePrediction(texture));
 
-                        SaveImage(texture, predictedClass);
                     }
                     else
                     {
@@ -75,6 +74,18 @@ public class CameraManager : MonoBehaviour
             Debug.Log("Permiso de cámara: " + permission);
         }
     }
+
+    private IEnumerator HandlePrediction(Texture2D texture)
+    {
+        var predictionTask = modelInference.Predict(texture);
+
+        while (!predictionTask.IsCompleted)
+            yield return null;
+
+        string predictedClass = predictionTask.Result;
+        SaveImage(texture, predictedClass);
+    }
+
 
     private void SaveImage(Texture2D image, string className)
     {

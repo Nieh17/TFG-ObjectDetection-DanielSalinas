@@ -15,7 +15,45 @@ public class GalleryManager : MonoBehaviour
 
     private void Start()
     {
+        /*string path = Path.Combine(Application.persistentDataPath, "SavedImages");
+
+        if (Directory.Exists(path))
+        {
+            Directory.Delete(path, true);
+        }*/
+
+
         imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
+
+
+        if (!Directory.Exists(imageDirectory))
+        {
+            Directory.CreateDirectory(imageDirectory);
+        }
+
+        string[] existingImages = Directory.GetFiles(imageDirectory, "*.jpg");
+
+        if (existingImages.Length == 0)
+        {
+            string sourceDirectory = Path.Combine(Application.dataPath, "Photos");
+
+            if (Directory.Exists(sourceDirectory))
+            {
+                string[] sourceImages = Directory.GetFiles(sourceDirectory, "*.jpg");
+
+                foreach (string sourcePath in sourceImages)
+                {
+                    string fileName = Path.GetFileName(sourcePath);
+                    string destPath = Path.Combine(imageDirectory, fileName);
+
+                    File.Copy(sourcePath, destPath, true);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró la carpeta Assets/Photos.");
+            }
+        }
     }
 
     public void LoadGallery()
@@ -42,111 +80,6 @@ public class GalleryManager : MonoBehaviour
             string fileName = Path.GetFileNameWithoutExtension(path);
             textComponent.text = fileName;
             
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
-        }
-
-        foreach (string path in imagePaths)
-        {
-            GameObject newCard = Instantiate(imagePrefab, galleryContainer);
-            RawImage rawImage = newCard.transform.Find("CardImage").GetComponent<RawImage>();
-
-            Texture2D texture = LoadTexture(path);
-            rawImage.texture = texture;
-
-            TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
-
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            textComponent.text = fileName;
-
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(galleryContainer.GetComponent<RectTransform>());

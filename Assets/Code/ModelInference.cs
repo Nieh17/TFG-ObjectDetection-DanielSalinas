@@ -3,25 +3,35 @@ using Unity.Barracuda;
 using System.Collections.Generic;
 using TMPro;
 using System.Xml.Schema;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class ModelInference : MonoBehaviour
 {
     public NNModel modelAsset;  // Modelo importado como NNModel
     private IWorker worker;
 
-    private List<string> classLabels = new List<string> { "gato", "mesa" };
+    //private List<string> classLabels = new List<string> { "gato", "mesa" };
+
+    Dictionary<string, int> classLabelsMap;
 
     public TextMeshProUGUI predictionText;
+
+    private MissionManager missionManager;
 
     // Cargar el modelo y preparar el worker
     private void Start()
     {
         var model = ModelLoader.Load(modelAsset);
         worker = WorkerFactory.CreateWorker(WorkerFactory.Type.ComputePrecompiled, model);
+
+        classLabelsMap = ClassLabelsManager.GetClassLabelMap();
+
+        missionManager = FindObjectOfType<MissionManager>();
     }
 
     // Función para predecir usando el modelo cargado
-    public string Predict(Texture2D inputImage)
+    public async Task<string> Predict(Texture2D inputImage)
     {
         float startTime = Time.realtimeSinceStartup;
         // Convertir la imagen a Tensor
@@ -42,12 +52,23 @@ public class ModelInference : MonoBehaviour
 
         Debug.Log("PREDICTED CLASS: "+predictedClass);
 
+        // Notificar al MissionManager
+        missionManager?.RegisterPhotographedObject(predictedClass);
+
+
         // Obtener el nombre de la clase correspondiente
-        string predictedClassName = classLabels[predictedClass];
+        string predictedClassName = classLabelsMap.FirstOrDefault(kvp => kvp.Value == predictedClass).Key;
+
+        string localizedPrediction = await LocalizationManager.GetLearningLocalizedString("Learning_Content", predictedClassName);
 
         // Mostrar la predicción
         Debug.Log("Prediction: "+predictedClassName);
-        predictionText.text = predictedClassName;
+
+        Debug.Log("Prediction Localized: " + localizedPrediction);
+
+
+        predictionText.text = localizedPrediction;
+        predictionText.gameObject.SetActive(true);
 
         tensor.Dispose();
 

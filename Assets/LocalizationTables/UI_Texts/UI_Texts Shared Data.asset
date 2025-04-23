@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: UI_Texts Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: UI_Texts
+  m_TableCollectionNameGuidString: 5e107e0de34832c44b83c9611d979b9b
+  m_Entries:
+  - m_Id: 127338369024
+    m_Key: Start_Recognition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 471342600192
+    m_Key: Start_Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 651240493056
+    m_Key: Gallery
+    m_Metadata:
+      m_Items: []
+  - m_Id: 762708316160
+    m_Key: Next_Life_Text
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 1346184302916796464
+  references:
+    version: 2
+    RefIds:
+    - rid: 1346184302916796464
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1745439409146
