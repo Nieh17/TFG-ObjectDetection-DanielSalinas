@@ -2,17 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.IO;
 
 public class FastTranslate : MonoBehaviour
 {
-    [System.Serializable]
-    public class WordPair
-    {
-        public string nativeWord;
-        public string translatedWord;
-    }
-
-    public List<WordPair> wordPairs;
     public Button[] optionButtons;
 
 
@@ -48,6 +41,8 @@ public class FastTranslate : MonoBehaviour
     [SerializeField] TMP_Text timeText;
     [SerializeField] TMP_Text xpText;
 
+    private int maxWords = 5;
+
     private int score;
     private float timer;
     private float timeLeft;
@@ -55,7 +50,7 @@ public class FastTranslate : MonoBehaviour
     private int seconds;
 
     private WordPair currentWord;
-    private List<WordPair> availableWordPairs;
+    public List<WordPair> availableWordPairs;
     private List<string> allTranslations = new List<string>();
     private bool gameActive = false;
 
@@ -110,13 +105,23 @@ public class FastTranslate : MonoBehaviour
         Setup();
     }
 
-    void Setup()
+    async void Setup()
     {
         gameActive = true;
-        availableWordPairs = new List<WordPair>(wordPairs);
+
+        string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
+        var preparedWordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, "Learning_Content", maxWords);
+
+        if (preparedWordPairs == null || preparedWordPairs.Count == 0)
+        {
+            Debug.LogWarning("No se encontraron palabras válidas.");
+            return;
+        }
+
+        availableWordPairs = new List<WordPair>(preparedWordPairs);
 
         allTranslations.Clear();
-        foreach (var pair in wordPairs)
+        foreach (var pair in availableWordPairs)
         {
             allTranslations.Add(pair.translatedWord);
         }
@@ -192,6 +197,9 @@ public class FastTranslate : MonoBehaviour
         }
 
         totalTries += 1;
+
+        Debug.Log("Correct Tries: " + correctTries);
+        Debug.Log("Total Tries: " + totalTries);
     }
 
     void UpdateTimerColor()
@@ -218,7 +226,9 @@ public class FastTranslate : MonoBehaviour
         minutes = Mathf.FloorToInt(timeLeft / 60);
         seconds = Mathf.FloorToInt(timeLeft % 60);
 
-        accuracyRate = ((float)correctTries / totalTries) * 100f;
+        var unmultiplied = (float) correctTries / totalTries;
+        accuracyRate = Mathf.RoundToInt(unmultiplied * 100);
+
         gameActive = false;
         totalXp = Mathf.CeilToInt(score / 10f);
 

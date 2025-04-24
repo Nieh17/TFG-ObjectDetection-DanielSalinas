@@ -4,16 +4,10 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using UnityEngine.SocialPlatforms.Impl;
+using System.IO;
 
 public class PairingGame : MonoBehaviour
 {
-    [System.Serializable]
-    public class WordPair
-    {
-        public string nativeWord;
-        public string translatedWord;
-    }
-
 
     public List<WordPair> wordPairs;
 
@@ -100,13 +94,18 @@ public class PairingGame : MonoBehaviour
     }
 
 
-    void SetupGame()
+    private async void SetupGame()
     {
-        selectedPairs = new List<WordPair>(wordPairs);
-        if (selectedPairs.Count > maxButtons)
+        string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
+        List<WordPair> wordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, "Learning_Content", maxButtons);
+
+        if (wordPairs == null || wordPairs.Count == 0)
         {
-            selectedPairs = selectedPairs.GetRange(0, maxButtons);
+            Debug.LogWarning("No se pudieron cargar las palabras.");
+            return;
         }
+
+        selectedPairs = new List<WordPair>(wordPairs);
 
         CreateButtons(selectedPairs);
 
@@ -292,7 +291,9 @@ public class PairingGame : MonoBehaviour
         minutes = Mathf.FloorToInt(timer / 60);
         seconds = Mathf.FloorToInt(timer % 60);
 
-        accuracyRate = ((float)correctTries / totalTries) * 100f;
+        var unmultiplied = (float)correctTries / totalTries;
+        accuracyRate = Mathf.RoundToInt(unmultiplied * 100);
+
         gameActive = false;
         
         totalXp = Mathf.CeilToInt(score / 10f);

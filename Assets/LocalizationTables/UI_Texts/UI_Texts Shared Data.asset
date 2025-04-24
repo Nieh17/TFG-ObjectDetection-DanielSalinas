@@ -31,6 +31,38 @@ MonoBehaviour:
     m_Key: Next_Life_Text
     m_Metadata:
       m_Items: []
+  - m_Id: 310992784674816
+    m_Key: Today_Mission
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311880609779712
+    m_Key: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311918509510656
+    m_Key: Pairing_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311947735420928
+    m_Key: Pairing_Explanation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 314418612490240
+    m_Key: FastTranslate_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 314456612884480
+    m_Key: FastTranslate_Explanation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315155308433408
+    m_Key: Syllable_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315202473381888
+    m_Key: Syllable_Explanation
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

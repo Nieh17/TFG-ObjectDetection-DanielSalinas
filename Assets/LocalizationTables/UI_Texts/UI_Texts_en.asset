@@ -34,6 +34,41 @@ MonoBehaviour:
     m_Localized: 'Next Life in:'
     m_Metadata:
       m_Items: []
+  - m_Id: 310992784674816
+    m_Localized: Today's Mission
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311880609779712
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311918509510656
+    m_Localized: Pairing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311947735420928
+    m_Localized: Match each word with its correct meaning and complete all the pairs
+      to win
+    m_Metadata:
+      m_Items: []
+  - m_Id: 314418612490240
+    m_Localized: Quick Translation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 314456612884480
+    m_Localized: Choose the correct translation for each word before time runs out.
+      You have 30 seconds to get them all right.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315155308433408
+    m_Localized: Order Syllables
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315202473381888
+    m_Localized: Drag the jumbled syllables into the correct spaces to form the word.
+      If all the syllables are in their correct places, you'll complete the challenge.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

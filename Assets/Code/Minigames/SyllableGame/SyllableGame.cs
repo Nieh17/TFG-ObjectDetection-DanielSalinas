@@ -1,19 +1,21 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
 public class SyllableGame : MonoBehaviour
 {
-    [System.Serializable]
+    /*[System.Serializable]
     public class WordPair
     {
         public string nativeWord;
         public string translatedWord;
-    }
+    }*/
 
 
     public List<WordPair> wordList;
@@ -112,17 +114,16 @@ public class SyllableGame : MonoBehaviour
         dropSlotZoneRect = dropSlotZone.GetComponent<RectTransform>();
     }
 
-    public void startGame()
+    public async void startGame()
     {
         introCanvas.SetActive(false);
         gameCanvas.SetActive(true);
 
-
-
-        PrepareWordQueue();
-        LoadNextWord();
-
+        bool isReady = await PrepareWordQueue();
+        
+        if(isReady) LoadNextWord();
     }
+
 
     private void Update()
     {
@@ -131,14 +132,30 @@ public class SyllableGame : MonoBehaviour
         timer += Time.deltaTime;
     }
 
-    private void PrepareWordQueue()
+    /*private void PrepareWordQueue()
     {
         List<WordPair> shuffledList = wordList.OrderBy(w => Random.value).ToList();
 
         wordsToPlay = new Queue<WordPair>(
             shuffledList.Where(w => GetSyllables(w.translatedWord).Count > 1).Take(maxWords)
         );
+    }*/
+
+    private async Task<bool> PrepareWordQueue()
+    {
+        string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
+        var wordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, "Learning_Content", maxWords);
+
+        if (wordPairs == null || wordPairs.Count == 0)
+        {
+            return false;
+        }
+
+        wordsToPlay = new Queue<WordPair>(wordPairs);
+
+        return true;
     }
+
 
     private void LoadNextWord()
     {
@@ -161,14 +178,12 @@ public class SyllableGame : MonoBehaviour
 
         List<string> syllables = GetSyllables(wordToSplit);
 
-        // Generar sílabas desordenadas en la zona inicial
         List<string> shuffledSyllables = syllables.OrderBy(s => Random.value).ToList();
 
         ClearPreviousElements();
 
         GenerateSyllables(shuffledSyllables, syllableSpawnZone);
 
-        // Generar los drop slots en el orden correcto
         GenerateDropSlots(syllables, dropSlotZone);
     }
 
@@ -227,15 +242,15 @@ public class SyllableGame : MonoBehaviour
 
         // Expresión regular para separar sílabas (básico para español e inglés)
         //string pattern = @"([^aeiou]*[aeiou]+(?:[mnrls]?))"; //español
-        //string pattern = @"[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$|[^aeiouy](?=[^aeiouy]))?"; //inglés
-        string pattern = @"(kya|kyu|kyo|gya|gyu|gyo|sha|shu|sho|ja|ju|jo|cha|chu|cho|nya|nyu|nyo|hya|hyu|hyo|"
+        string pattern = @"[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$|[^aeiouy](?=[^aeiouy]))?"; //inglés
+        /*string pattern = @"(kya|kyu|kyo|gya|gyu|gyo|sha|shu|sho|ja|ju|jo|cha|chu|cho|nya|nyu|nyo|hya|hyu|hyo|"
                         + @"bya|byu|byo|pya|pyu|pyo|mya|myu|myo|rya|ryu|ryo|"
                         + @"kk|ss|tt|pp|"
                         + @"ba|bi|bu|be|bo|ca|chi|da|de|do|fa|fi|fu|fe|fo|ga|gi|gu|ge|go|"
                         + @"ha|hi|fu|he|ho|ka|ki|ku|ke|ko|ma|mi|mu|me|mo|"
                         + @"na|ni|nu|ne|no|pa|pi|pu|pe|po|ra|ri|ru|re|ro|"
                         + @"sa|shi|su|se|so|ta|te|to|wa|wo|ya|yu|yo|za|ji|zu|ze|zo|n|"
-                        + @"[aiueo])";
+                        + @"[aiueo])";*/ //japonés
         MatchCollection matches = Regex.Matches(word.ToLower(), pattern);
 
         foreach (Match match in matches)
@@ -246,7 +261,7 @@ public class SyllableGame : MonoBehaviour
         // Si solo hay una sílaba, no es necesario desordenar
         if (syllables.Count <= 1)
         {
-            return new List<string> { word }; // Devuelve la palabra completa
+            return new List<string> { word };
         }
 
         return syllables;
@@ -298,7 +313,8 @@ public class SyllableGame : MonoBehaviour
         minutes = Mathf.FloorToInt(timer / 60);
         seconds = Mathf.FloorToInt(timer % 60);
 
-        accuracyRate = ((float)correctTries / totalTries) * 100f;
+        var unmultiplied = (float)correctTries / totalTries;
+        accuracyRate = Mathf.RoundToInt(unmultiplied * 100);
 
         totalXp = Mathf.CeilToInt(score / 10f);
         if (totalXp < 0) totalXp = 1;

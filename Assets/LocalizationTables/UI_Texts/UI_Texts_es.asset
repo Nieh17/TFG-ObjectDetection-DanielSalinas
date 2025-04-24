@@ -34,6 +34,42 @@ MonoBehaviour:
     m_Localized: "Pr\xF3xima vida en:"
     m_Metadata:
       m_Items: []
+  - m_Id: 310992784674816
+    m_Localized: Misiones de hoy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311880609779712
+    m_Localized: Continuar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311918509510656
+    m_Localized: Emparejamiento
+    m_Metadata:
+      m_Items: []
+  - m_Id: 311947735420928
+    m_Localized: Empareja cada palabra con su significado correcto y completa todas
+      las parejas para ganar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 314418612490240
+    m_Localized: "Traducci\xF3n R\xE1pida"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 314456612884480
+    m_Localized: "Elige la traducci\xF3n correcta para cada palabra antes de que
+      se acabe el tiempo. Tienes 30 segundos para acertar todas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315202473381888
+    m_Localized: "Arrastra las s\xEDlabas desordenadas a los espacios correctos para
+      formar la palabra. Si todas las s\xEDlabas est\xE1n en su lugar, completar\xE1s
+      el desaf\xEDo."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 315155308433408
+    m_Localized: "Ordenar S\xEDlabas"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
