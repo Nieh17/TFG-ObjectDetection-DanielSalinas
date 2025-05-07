@@ -70,6 +70,140 @@ MonoBehaviour:
     m_Localized: "Ordenar S\xEDlabas"
     m_Metadata:
       m_Items: []
+  - m_Id: 2121225383268352
+    m_Localized: "avi\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121250062553088
+    m_Localized: "bal\xF3n de baloncesto"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121278701260800
+    m_Localized: "bol\xEDgrafo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121296891957248
+    m_Localized: coche
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121318962384896
+    m_Localized: contenedor de basura
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121345239699456
+    m_Localized: elefante
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121359424835584
+    m_Localized: farola
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121382812274688
+    m_Localized: flamenco
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121410687619072
+    m_Localized: gato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121432015654912
+    m_Localized: mesa
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121470439673856
+    m_Localized: metro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121482607349760
+    m_Localized: motocicleta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121501913731072
+    m_Localized: paloma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121515884957696
+    m_Localized: perro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121527557705728
+    m_Localized: puerta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121539276591104
+    m_Localized: "\xE1rbol"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2164691731566592
+    m_Localized: "\xA1JUEGO COMPLETADO!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165006392446976
+    m_Localized: BIEN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165063476924416
+    m_Localized: MAL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165559566618624
+    m_Localized: TIEMPO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165799740854272
+    m_Localized: XP TOTAL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166350910148608
+    m_Localized: RECLAMAR XP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2201079348809728
+    m_Localized: BIENVENIDO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2201146663194624
+    m_Localized: "\xA1Hola!  Veo que es tu primera vez por aqu\xED. Antes de empezar,
+      necesito que configures algunas cosas importantes.\n\nEsto me ayudar\xE1 a
+      prepararte la mejor experiencia posible."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2201170881105920
+    m_Localized: "\xA1Vamos all\xE1!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2202923139682304
+    m_Localized: "Japon\xE9s"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2202959550435328
+    m_Localized: "Espa\xF1ol"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2202972804435968
+    m_Localized: "Ingl\xE9s"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2203796561547264
+    m_Localized: IDIOMA PARA ESTUDIAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2508454920278016
+    m_Localized: SALTAR INTRODUCCIONES
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2508893933883392
+    m_Localized: GUARDAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2718607384858624
+    m_Localized: Ajustes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3956105004011520
+    m_Localized: 'Objeto a fotografiar: '
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

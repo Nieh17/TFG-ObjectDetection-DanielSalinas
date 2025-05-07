@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class WordPreparationService
 {
-    public static async Task<List<WordPair>> PrepareWordQueueAsync(string imageDirectory, string tableName, int maxWords)
+    public static async Task<List<WordPair>> PrepareWordQueueAsync(string imageDirectory, int maxWords)
     {
         if (!Directory.Exists(imageDirectory))
         {
@@ -17,8 +17,7 @@ public static class WordPreparationService
         string[] imagePaths = Directory.GetFiles(imageDirectory, "*.jpg");
         List<string> keys = imagePaths.Select(path => Path.GetFileNameWithoutExtension(path)).ToList();
 
-        // Obtiene las palabras localizadas
-        List<WordPair> loadedWords = await LocalizationManager.GetLocalizedWordPairs(keys, tableName);
+        List<WordPair> loadedWords = await LocalizationManager.GetLocalizedWordPairs(keys);
 
         if (loadedWords == null || loadedWords.Count == 0)
         {
@@ -26,7 +25,6 @@ public static class WordPreparationService
             return new List<WordPair>();
         }
 
-        // Limitar el número de palabras a las máximas permitidas
         return loadedWords.OrderBy(w => Random.value).Take(maxWords).ToList();
 
 

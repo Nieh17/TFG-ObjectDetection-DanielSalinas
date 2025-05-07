@@ -63,6 +63,138 @@ MonoBehaviour:
     m_Key: Syllable_Explanation
     m_Metadata:
       m_Items: []
+  - m_Id: 2121225383268352
+    m_Key: "avi\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121250062553088
+    m_Key: "bal\xF3n de baloncesto"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121278701260800
+    m_Key: "bol\xEDgrafo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121296891957248
+    m_Key: coche
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121318962384896
+    m_Key: contenedor de basura
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121345239699456
+    m_Key: elefante
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121359424835584
+    m_Key: farola
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121382812274688
+    m_Key: flamenco
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121410687619072
+    m_Key: gato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121432015654912
+    m_Key: mesa
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121470439673856
+    m_Key: metro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121482607349760
+    m_Key: motocicleta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121501913731072
+    m_Key: paloma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121515884957696
+    m_Key: perro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121527557705728
+    m_Key: puerta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2121539276591104
+    m_Key: "\xE1rbol"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2164691731566592
+    m_Key: game_completed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165006392446976
+    m_Key: end_good
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165063476924416
+    m_Key: end_bad
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165559566618624
+    m_Key: end_time
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2165799740854272
+    m_Key: end_xp
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166350910148608
+    m_Key: end_claim_xp
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2201079348809728
+    m_Key: welcome_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2201146663194624
+    m_Key: welcome_description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2201170881105920
+    m_Key: welcome_button
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2202923139682304
+    m_Key: japanese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2202959550435328
+    m_Key: spanish
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2202972804435968
+    m_Key: english
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2203796561547264
+    m_Key: settings_language_to_study
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2508454920278016
+    m_Key: settings_skip_introductions
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2508893933883392
+    m_Key: settings_save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2718607384858624
+    m_Key: settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3956105004011520
+    m_Key: mission
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

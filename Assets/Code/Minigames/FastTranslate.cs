@@ -110,7 +110,7 @@ public class FastTranslate : MonoBehaviour
         gameActive = true;
 
         string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
-        var preparedWordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, "Learning_Content", maxWords);
+        var preparedWordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, maxWords);
 
         if (preparedWordPairs == null || preparedWordPairs.Count == 0)
         {

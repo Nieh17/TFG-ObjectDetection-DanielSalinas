@@ -66,10 +66,6 @@ MonoBehaviour:
     m_Localized: motocicleta
     m_Metadata:
       m_Items: []
-  - m_Id: 1277655601152
-    m_Localized: nube
-    m_Metadata:
-      m_Items: []
   - m_Id: 1293770117120
     m_Localized: paloma
     m_Metadata:
@@ -84,6 +80,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1338997297152
     m_Localized: "\xE1rbol"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3160006169284608
+    m_Localized: gafas
     m_Metadata:
       m_Items: []
   references:

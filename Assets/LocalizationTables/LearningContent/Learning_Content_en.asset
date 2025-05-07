@@ -34,10 +34,6 @@ MonoBehaviour:
     m_Localized: pigeon
     m_Metadata:
       m_Items: []
-  - m_Id: 1277655601152
-    m_Localized: cloud
-    m_Metadata:
-      m_Items: []
   - m_Id: 1272265920512
     m_Localized: motorbike
     m_Metadata:
@@ -84,6 +80,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 636673675264
     m_Localized: plane
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3160006169284608
+    m_Localized: glasses
     m_Metadata:
       m_Items: []
   references:

@@ -1,8 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 public class MissionManager : MonoBehaviour
 {
@@ -13,18 +14,18 @@ public class MissionManager : MonoBehaviour
     [SerializeField] Animator animator;
 
 
-    private int numberOfMissions = 2; // Número de misiones que se eligen al azar
+    private int numberOfMissions = 2; // NÃºmero de misiones que se eligen al azar
     private List<Mission> allMissions = new List<Mission>(); // Lista para almacenar todas las misiones
-    private List<MissionProgress> todaysMissionsProgress = new List<MissionProgress>(); // Progreso de misiones del día
+    private List<MissionProgress> todaysMissionsProgress = new List<MissionProgress>(); // Progreso de misiones del dÃ­a
 
-    private void Start()
+    private async void Start()
     {
-        //ResetMissionProgress();
+        ResetMissionProgress();
 
         string todayDate = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
         string savedDate = PlayerPrefs.GetString("LastMissionDate", "");
 
-        LoadMissions();
+        await LoadMissions();
 
         if (todayDate != savedDate)
         {
@@ -46,18 +47,43 @@ public class MissionManager : MonoBehaviour
         SetUi();
     }
 
-
-    // Cargar todas las misiones posibles
-    private void LoadMissions()
+    private void OnEnable()
     {
-        allMissions.Add(new Mission("Fotografía un flamenco", new List<int> { 7 }));
-        allMissions.Add(new Mission("Fotografía un coche", new List<int> { 3 }));
+        SettingsManager.OnSettingsSaved += OnSettingsChanged;
     }
+
+    private void OnDisable()
+    {
+        SettingsManager.OnSettingsSaved -= OnSettingsChanged;
+    }
+
+
+
+    private async Task LoadMissions()
+    {
+        Dictionary<string, int> classLabelMap = ClassLabelsManager.GetClassLabelMap();
+
+        string missionLocalized = await LocalizationManager.GetUILocalizedString("mission");
+
+
+        foreach (var kvp in classLabelMap)
+        {
+            string objectName = kvp.Key;
+            int objectValue = kvp.Value;
+
+            string objectNameLocalized = await LocalizationManager.GetLearningLocalizedString(objectName);
+
+            string description = missionLocalized + objectNameLocalized;
+            Debug.Log(description);
+            allMissions.Add(new Mission(description, new List<int> { objectValue }));
+        }
+    }
+
 
 
     private void SelectMissions()
     {
-        // Limpiar las misiones del día anterior
+        // Limpiar las misiones del dÃ­a anterior
         todaysMissionsProgress.Clear();
 
         // Asegurarse de no repetir misiones (si hay suficientes)
@@ -72,7 +98,7 @@ public class MissionManager : MonoBehaviour
             Mission selected = availableMissions[index];
             availableMissions.RemoveAt(index);
 
-            // Crear el progreso para esta misión
+            // Crear el progreso para esta misiÃ³n
             MissionProgress progress = new MissionProgress(selected.missionDescription, selected.objectValuesToPhotograph);
             todaysMissionsProgress.Add(progress);
 
@@ -84,7 +110,7 @@ public class MissionManager : MonoBehaviour
             selectedDescriptions.Add(progress.missionDescription);
         }
 
-        // Guardar la lista de descripciones para recuperar las misiones más tarde
+        // Guardar la lista de descripciones para recuperar las misiones mÃ¡s tarde
         string joinedDescriptions = string.Join("|", selectedDescriptions);
         PlayerPrefs.SetString("TodaysMissionDescriptions", joinedDescriptions);
 
@@ -93,7 +119,7 @@ public class MissionManager : MonoBehaviour
         // Mostrar misiones de hoy (solo para debug)
         foreach (MissionProgress progress in todaysMissionsProgress)
         {
-            Debug.Log("Misión de hoy: " + progress.missionDescription);
+            Debug.Log("MisiÃ³n de hoy: " + progress.missionDescription);
         }
     }
 
@@ -131,7 +157,7 @@ public class MissionManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"No se encontró progreso guardado para la misión: {desc}");
+                    Debug.LogWarning($"No se encontrÃ³ progreso guardado para la misiÃ³n: {desc}");
                 }
             }
         }
@@ -142,40 +168,22 @@ public class MissionManager : MonoBehaviour
     }
 
 
-    // Comprobar si la misión ha sido completada (cuando el jugador haya fotografiado algo)
-    public void CompleteMission(List<int> photographedValues)
-    {
-        foreach (MissionProgress mission in todaysMissionsProgress)
-        {
-            foreach (var value in photographedValues)
-            {
-                mission.AddPhotographedValue(value);
-            }
-
-            // Aquí puedes mostrar el porcentaje de completado o activar algún evento
-            Debug.Log($"Misión: {mission.missionDescription} - Progreso: {mission.completionPercentage}%");
-
-            if (mission.completionPercentage >= 100)
-            {
-                Debug.Log("¡Misión completada! Descripción: " + mission.missionDescription);
-                SaveMissionProgress(); // Guardamos el progreso cuando se completa
-            }
-        }
-    }
-
     public void RegisterPhotographedObject(int objectValue)
     {
         Debug.Log("Entro en registered photographed object");
         Debug.Log("Todays Mission Progress Size: " + todaysMissionsProgress.Count);
         foreach (MissionProgress mission in todaysMissionsProgress)
         {
+            bool wasAlreadyCompleted = mission.IsMissionCompleted();
+
             mission.AddPhotographedValue(objectValue);
 
-            Debug.Log($"Misión: {mission.missionDescription} - Progreso: {mission.completionPercentage}%");
+            Debug.Log($"MisiÃ³n: {mission.missionDescription} - Progreso: {mission.completionPercentage}%");
 
-            if (mission.completionPercentage >= 100)
+            if (!wasAlreadyCompleted && mission.IsMissionCompleted())
             {
-                Debug.Log("¡Misión completada! Descripción: " + mission.missionDescription);
+                Debug.Log("Â¡MisiÃ³n completada! DescripciÃ³n: " + mission.missionDescription);
+                GetMissionPopUp();
             }
         }
 
@@ -184,18 +192,16 @@ public class MissionManager : MonoBehaviour
         SetUi();
     }
 
-    public void GetUi(Button buttonToDissappear)
+    public void GetMissionPopUp()
     {
-        Debug.Log("Entro al getUI");
         animator.SetTrigger("appear");
-
-        buttonToDissappear.gameObject.SetActive(false);
+        StartCoroutine(CloseMissionPopUp());
     }
 
-    public void CloseUI(Button buttonToAppear)
+    private IEnumerator CloseMissionPopUp()
     {
+        yield return new WaitForSeconds(5f);
         animator.SetTrigger("disappear");
-        buttonToAppear.gameObject.SetActive(true);
     }
 
     void SetUi()
@@ -208,6 +214,33 @@ public class MissionManager : MonoBehaviour
             missionsPercentText[i].text = mission.completionPercentage.ToString() + " %";
             missionsPercent[i].fillAmount = mission.completionPercentage / 100;
         }
+    }
+
+    private async void OnSettingsChanged()
+    {
+        allMissions.Clear();
+        await LoadMissions();
+
+        foreach (var mission in todaysMissionsProgress)
+        {
+            foreach (var possible in allMissions)
+            {
+                bool sameValues = possible.objectValuesToPhotograph.Count == mission.objectValuesToPhotograph.Count &&
+                                  possible.objectValuesToPhotograph.TrueForAll(v => mission.objectValuesToPhotograph.Contains(v));
+
+                if (sameValues)
+                {
+                    mission.missionDescription = possible.missionDescription;
+                    break;
+                }
+            }
+        }
+
+        SaveMissionProgress();
+
+        SetUi();
+
+        Debug.Log("[MissionManager] Misiones del dÃ­a actualizadas al nuevo idioma.");
     }
 
 

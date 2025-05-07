@@ -44,7 +44,17 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void OnDrag(PointerEventData eventData)
     {
-        rectTransform.position = eventData.position;
+        Vector2 localPoint;
+        Canvas canvas = GetComponentInParent<Canvas>();
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform,
+                eventData.position,
+                canvas.worldCamera,
+                out localPoint))
+        {
+            rectTransform.localPosition = localPoint;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)

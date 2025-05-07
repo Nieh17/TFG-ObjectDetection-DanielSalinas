@@ -34,10 +34,6 @@ MonoBehaviour:
     m_Localized: hato
     m_Metadata:
       m_Items: []
-  - m_Id: 1277655601152
-    m_Localized: kumo
-    m_Metadata:
-      m_Items: []
   - m_Id: 1272265920512
     m_Localized: baiku
     m_Metadata:
@@ -84,6 +80,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 636673675264
     m_Localized: hikouki
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3160006169284608
+    m_Localized: megane
     m_Metadata:
       m_Items: []
   references:

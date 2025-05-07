@@ -97,7 +97,7 @@ public class PairingGame : MonoBehaviour
     private async void SetupGame()
     {
         string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
-        List<WordPair> wordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, "Learning_Content", maxButtons);
+        List<WordPair> wordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, maxButtons);
 
         if (wordPairs == null || wordPairs.Count == 0)
         {
