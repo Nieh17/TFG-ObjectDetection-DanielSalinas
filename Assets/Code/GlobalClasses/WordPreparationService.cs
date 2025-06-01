@@ -26,23 +26,5 @@ public static class WordPreparationService
         }
 
         return loadedWords.OrderBy(w => Random.value).Take(maxWords).ToList();
-
-
-        /* List<string> keys = imagePaths.Select(path => Path.GetFileNameWithoutExtension(path)).ToList();
-
-        List<WordPair> loadedWords = await LocalizationManager.GetLocalizedWordPairs(keys, "Learning_Content");
-
-
-         loadedWords = loadedWords
-        .Where(w => GetSyllables(w.nativeWord).Count > 1)
-        .OrderBy(w => Random.value)
-        .Take(maxWords)
-        .ToList();
-        
-
-        wordsToPlay = new Queue<WordPair>(loadedWords);
-        
-        return true;
-         */
     }
 }

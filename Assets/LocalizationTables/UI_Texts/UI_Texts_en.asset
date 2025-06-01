@@ -27,11 +27,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 651240493056
-    m_Localized: Gallery
+    m_Localized: Photo Gallery
     m_Metadata:
       m_Items: []
   - m_Id: 762708316160
-    m_Localized: 'Next Life in:'
+    m_Localized: 'Next Life in: '
     m_Metadata:
       m_Items: []
   - m_Id: 310992784674816

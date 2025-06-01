@@ -1,23 +1,35 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
+using Random = UnityEngine.Random;
 
-public class SyllableGame : MonoBehaviour
+public class SyllableGameTwo : GameBase
 {
-    public List<WordPair> wordList;
+    [Header("General Canvas")]
+    [SerializeField] private GameObject generalCanvas;
+    protected override GameObject GeneralCanvas => generalCanvas;
+
+    [Header("Introduction")]
+    [SerializeField] private GameObject introCanvas;
+    protected override GameObject IntroCanvas => introCanvas;
+
+    [Header("Game's Canvas")]
+    [SerializeField] private GameObject gameCanvas;
+    protected override GameObject GameCanvas => gameCanvas;
+
+    [Header("End Game's Canvas")]
+    [SerializeField] private GameObject endPanel;
+    protected override GameObject EndPanel => endPanel;
 
     private Queue<WordPair> wordsToPlay;
     private WordPair currentWord;
 
     private int maxWords = 5;
-
-
 
     public GameObject syllablePrefab;
     public GameObject dropSlotPrefab;
@@ -32,100 +44,50 @@ public class SyllableGame : MonoBehaviour
 
     private List<DropSlot> dropSlots = new List<DropSlot>();
 
-    [Header("General Canvas")]
-    [SerializeField] GameObject generalCanvas;
-
-    [Header("Introduction")]
-    [SerializeField] GameObject introCanvas;
-
-    [Header("Game's Canvas")]
-    [SerializeField] GameObject gameCanvas;
-
     [Header("Game's Objects")]
     [SerializeField] TMP_Text nativeWordText;
     [SerializeField] TMP_Text currentLivesText;
 
-    [Header("End Game's Canvas")]
-    [SerializeField] GameObject endPanel;
-
-    [Header("End Game's Canvas Texts")]
-    [SerializeField] TMP_Text accuracyTitle;
-    [SerializeField] TMP_Text accuracyText;
-    [SerializeField] TMP_Text timeText;
-    [SerializeField] TMP_Text xpText;
-
-    private float timer;
-    private float timeLeft;
-    private int minutes;
-    private int seconds;
-
-    private int totalTries;
-    private int correctTries;
-    private float accuracyRate;
-
-    private int score;
-    private int totalXp;
-
-    private bool gameActive;
-
-    private const string SelectedLanguageKey = "SelectedLanguage";
-    private const string JAPANESE = "japanese";
-    private const string SPANISH = "spanish";
-    private const string ENGLISH = "english";
-
-    private void OnEnable()
+    private void Awake()
     {
-        DropSlot.OnSyllablePlacedCorrectly += CheckWinCondition;
+        ClearPreviousElements();
 
+        syllableSpawnZoneRect = syllableSpawnZone.GetComponent<RectTransform>();
+        dropSlotZoneRect = dropSlotZone.GetComponent<RectTransform>();
+    }
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        DropSlot.OnSyllablePlacedCorrectly += CheckWinCondition;
         DraggableSyllable.OnSyllablePlacedUncorrectly += AddTotalTries;
 
-        gameActive = false;
-        timer = 0f;
-        minutes = 0;
-        seconds = 0;
-
-        totalTries = 0;
-        correctTries = 0;
-        accuracyRate = 0f;
-
-        score = 0;
-        totalXp = 0;
-
-        generalCanvas.SetActive(true);
-        introCanvas.SetActive(true);
+        Debug.Log(syllableSpawnZone != null);
     }
 
     private void OnDisable()
     {
         DropSlot.OnSyllablePlacedCorrectly -= CheckWinCondition;
-
         DraggableSyllable.OnSyllablePlacedUncorrectly -= AddTotalTries;
     }
 
-    private void Start()
-    {
-        syllableSpawnZoneRect = syllableSpawnZone.GetComponent<RectTransform>();
-        dropSlotZoneRect = dropSlotZone.GetComponent<RectTransform>();
-    }
+    private void Start(){}
 
-    public async void startGame()
+    protected override async void SetupGame()
     {
-        introCanvas.SetActive(false);
-        gameCanvas.SetActive(true);
-
         bool isReady = await PrepareWordQueue();
-        
-        if(isReady) LoadNextWord();
+
+        if (isReady) LoadNextWord();
     }
 
-
-    private void Update()
+    protected override void Update()
     {
-        if (!gameActive) return;
-
-        timer += Time.deltaTime;
+        base.Update();
     }
 
+    public override void StartGame()
+    {
+        base.StartGame();
+    }
 
     private async Task<bool> PrepareWordQueue()
     {
@@ -142,7 +104,6 @@ public class SyllableGame : MonoBehaviour
         return true;
     }
 
-
     private void LoadNextWord()
     {
         if (wordsToPlay.Count == 0)
@@ -152,11 +113,10 @@ public class SyllableGame : MonoBehaviour
         }
 
         currentWord = wordsToPlay.Dequeue();
-        nativeWordText.text = currentWord.nativeWord;
+        if (nativeWordText) nativeWordText.text = currentWord.nativeWord;
 
         GenerateGame(currentWord.translatedWord);
     }
-
 
     private void GenerateGame(string wordToSplit)
     {
@@ -175,50 +135,47 @@ public class SyllableGame : MonoBehaviour
 
     private void GenerateSyllables(List<string> syllables, Transform parent)
     {
-        float currentX = 0f;
-        float currentY = 0f;
-        int syllablesPerLine = Mathf.FloorToInt(syllableSpawnZoneRect.rect.width / spacing);
-
-        for (int i = 0; i < syllables.Count; i++)
+        GenerateAndPositionElements(syllables, parent, syllablePrefab, (syllableObj, syllableText) =>
         {
-            if (currentX + spacing > syllableSpawnZoneRect.rect.width)
-            {
-                currentX = 0f;
-                currentY -= lineHeight;
-            }
-
-            GameObject syllableObj = Instantiate(syllablePrefab, parent);
-            syllableObj.GetComponent<DraggableSyllable>().SetText(syllables[i]);
-            syllableObj.GetComponent<RectTransform>().localPosition = new Vector3(currentX, currentY, 0);
-            currentX += spacing;
-        }
+            syllableObj.GetComponent<DraggableSyllable>().SetText(syllableText);
+        }, syllableSpawnZoneRect);
     }
 
     private void GenerateDropSlots(List<string> syllables, Transform parent)
     {
         dropSlots.Clear();
 
+        GenerateAndPositionElements(syllables, parent, dropSlotPrefab, (dropSlotObj, expectedSyllable) =>
+        {
+            DropSlot slotComponent = dropSlotObj.GetComponent<DropSlot>();
+            slotComponent.expectedSyllable = expectedSyllable;
+            dropSlots.Add(slotComponent);
+        }, dropSlotZoneRect);
+    }
+
+    private void GenerateAndPositionElements(List<string> elementsData, Transform parent, GameObject prefab, Action<GameObject, string> onElementCreated, RectTransform zoneRectTransform)
+    {
+        Debug.Log($"Generating elements. Parent: {parent?.name}, Prefab: {prefab?.name}, ZoneRectTransform: {zoneRectTransform?.name}");
+
         float currentX = 0f;
         float currentY = 0f;
-        int slotsPerLine = Mathf.FloorToInt(dropSlotZoneRect.rect.width / spacing);
+        int elementsPerLine = (spacing > 0) ? Mathf.FloorToInt(zoneRectTransform.rect.width / spacing) : 1;
+        if (elementsPerLine == 0) elementsPerLine = 1;
 
-        for (int i = 0; i < syllables.Count; i++)
+        for (int i = 0; i < elementsData.Count; i++)
         {
-            if (currentX + spacing > dropSlotZoneRect.rect.width)
+            if (currentX + spacing > zoneRectTransform.rect.width)
             {
                 currentX = 0f;
                 currentY -= lineHeight;
             }
 
-            GameObject dropSlot = Instantiate(dropSlotPrefab, parent);
-            dropSlot.GetComponent<RectTransform>().localPosition = new Vector3(currentX, currentY, 0);
-            
-            DropSlot slotComponent = dropSlot.GetComponent<DropSlot>();
-            slotComponent.expectedSyllable = syllables[i];
+            GameObject newObj = Instantiate(prefab, parent);
+            newObj.GetComponent<RectTransform>().localPosition = new Vector3(currentX, currentY, 0);
+
+            onElementCreated?.Invoke(newObj, elementsData[i]);
 
             currentX += spacing;
-
-            dropSlots.Add(slotComponent);
         }
     }
 
@@ -227,7 +184,7 @@ public class SyllableGame : MonoBehaviour
         List<string> syllables = new List<string>();
 
         string language = PlayerPrefs.GetString(SelectedLanguageKey, ENGLISH);
-        
+
         string pattern = "";
         switch (language)
         {
@@ -246,7 +203,7 @@ public class SyllableGame : MonoBehaviour
                 pattern = @"([^aeiou]*[aeiou]+(?:[mnrls]?))";
                 break;
 
-            default:
+            default: // English
                 pattern = @"[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$|[^aeiouy](?=[^aeiouy]))?";
                 break;
         }
@@ -277,7 +234,7 @@ public class SyllableGame : MonoBehaviour
         correctTries += 1;
         score += 10;
         totalTries += 1;
-        
+
         foreach (DropSlot slot in dropSlots)
         {
             if (!slot.IsCorrectlyFilled())
@@ -294,46 +251,11 @@ public class SyllableGame : MonoBehaviour
         totalTries += 1;
         score -= 5;
 
-        LifeManager.instance.LoseLife();
-        currentLivesText.text = LifeManager.instance.currentLives.ToString();
+        base.LoseLife(currentLivesText);
     }
 
-
-
-    private void EndGame()
+    protected override void ResetGameSpecificUI()
     {
-        gameActive = false;
-
-        endPanel.SetActive(true);
-
-        minutes = Mathf.FloorToInt(timer / 60);
-        seconds = Mathf.FloorToInt(timer % 60);
-
-        var unmultiplied = (float)correctTries / totalTries;
-        accuracyRate = Mathf.RoundToInt(unmultiplied * 100);
-
-        totalXp = Mathf.CeilToInt(score / 10f);
-        if (totalXp < 0) totalXp = 1;
-
-        if (accuracyRate > 50) accuracyTitle.text = "Good";
-        else accuracyTitle.text = "Bad";
-        accuracyText.text = accuracyRate.ToString() + "%";
-        timeText.text = minutes + ":" + seconds.ToString("D2");
-        xpText.text = totalXp.ToString() + "XP";
-    }
-
-    public void returnToMainMenu(GameObject objectToActivate)
-    {
-        LevelManager.Instance.AddXP(totalXp);
-
-
-        endPanel.SetActive(false);
-        gameCanvas.SetActive(false);
-        introCanvas.SetActive(true);
-        generalCanvas.SetActive(false);
-
-        gameObject.SetActive(false);
-
-        objectToActivate.SetActive(true);
+        ClearPreviousElements();
     }
 }

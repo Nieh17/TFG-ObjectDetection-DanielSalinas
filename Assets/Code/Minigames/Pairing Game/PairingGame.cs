@@ -3,38 +3,34 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using UnityEngine.SocialPlatforms.Impl;
 using System.IO;
+using Unity.VisualScripting;
 
-public class PairingGame : MonoBehaviour
+public class PairingGame : GameBase
 {
-
     public List<WordPair> wordPairs;
 
     [Header("General Canvas")]
-    [SerializeField] GameObject generalCanvas;
+    [SerializeField] private GameObject generalCanvas;
+    protected override GameObject GeneralCanvas => generalCanvas;
 
     [Header("Introduction")]
-    [SerializeField] GameObject introCanvas;
+    [SerializeField] private GameObject introCanvas;
+    protected override GameObject IntroCanvas => introCanvas;
 
     [Header("Game's Canvas")]
-    [SerializeField] GameObject gameCanvas;
+    [SerializeField] private GameObject gameCanvas;
+    protected override GameObject GameCanvas => gameCanvas;
+
+    [Header("End Game's Canvas")]
+    [SerializeField] private GameObject endPanel;
+    protected override GameObject EndPanel => endPanel;
 
     [Header("Game's Objects")]
     public GameObject buttonPrefab;
     public Transform nativeColumn;
     public Transform translatedColumn;
     [SerializeField] TMP_Text currentLivesText;
-
-    [Header("End Game Canvas")]
-    [SerializeField] GameObject endPanel;
-
-    [Header("End Game's Canvas Texts")]
-    [SerializeField] TMP_Text accuracyTitle;
-    [SerializeField] TMP_Text accuracyText;
-    [SerializeField] TMP_Text timeText;
-    [SerializeField] TMP_Text xpText;
-
 
     List<WordPair> selectedPairs;
     private Dictionary<Button, string> buttonDictionary = new Dictionary<Button, string>();
@@ -47,54 +43,23 @@ public class PairingGame : MonoBehaviour
     private const int maxButtons = 5;
     private const float verticalSpacing = 16f;
 
-    private bool gameActive = false;
-    private float timer;
-    private int minutes;
-    private int seconds;
-
-    private int totalTries;
-    private int correctTries;
-    private float accuracyRate;
-
-    private int score;
-    private int totalXp;
-
-    void OnEnable()
+    protected override void OnEnable()
     {
-        gameActive = false;
-        timer = 0f;
-        minutes = 0;
-        seconds = 0;
-
-        totalTries = 0;
-        correctTries = 0;
-        accuracyRate = 0f;
-
-        score = 0;
-        totalXp = 0;
-
-        generalCanvas.SetActive(true);
-        introCanvas.SetActive(true);
+        base.OnEnable();
+        //ClearPreviousButtons();
     }
 
-    private void Update()
+    protected override void Update()
     {
-        if (!gameActive) return;
-
-        timer += Time.deltaTime;
+        base.Update();
     }
 
-
-    public void startGame()
+    public override void StartGame()
     {
-        introCanvas.SetActive(false);
-        gameCanvas.SetActive(true);
-        SetupGame();
-
+        base.StartGame();
     }
 
-
-    private async void SetupGame()
+    protected override async void SetupGame()
     {
         string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
         List<WordPair> wordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, maxButtons);
@@ -111,8 +76,6 @@ public class PairingGame : MonoBehaviour
 
         ShuffleButtons(originalButtons, nativeColumn);
         ShuffleButtons(translatedButtons, translatedColumn);
-
-        gameActive = true;
     }
 
     void CreateButtons(List<WordPair> selectedPairs)
@@ -171,7 +134,6 @@ public class PairingGame : MonoBehaviour
 
     void OnButtonClicked(Button btn)
     {
-        // Si el botón ya ha sido emparejado, no hacer nada
         if (pairedButtons.Contains(btn) || temporarilyDisabledButtons.Contains(btn))
             return;
 
@@ -182,8 +144,10 @@ public class PairingGame : MonoBehaviour
 
             if (firstIsOriginal == currentIsOriginal)
             {
-                return; // No permite seleccionar dos botones de la misma columna
+                return;
             }
+
+            totalTries += 1;
 
             if (ArePair(firstSelected, btn))
             {
@@ -193,7 +157,6 @@ public class PairingGame : MonoBehaviour
                 pairedButtons.Add(btn);
 
                 correctTries += 1;
-
                 score += 10;
 
                 CheckGameEnd();
@@ -203,15 +166,11 @@ public class PairingGame : MonoBehaviour
                 score -= 5;
                 firstSelected.GetComponent<Image>().color = Color.white;
 
-                //TODO RESTAR VIDA
-                LifeManager.instance.LoseLife();
-                currentLivesText.text = LifeManager.instance.currentLives.ToString();
+                base.LoseLife(currentLivesText);
             }
 
-            totalTries += 1;
-
             firstSelected = null;
-            EnableAllButtons(); // Reactivar los botones bloqueados temporalmente
+            EnableAllButtons();
         }
         else
         {
@@ -230,7 +189,7 @@ public class PairingGame : MonoBehaviour
             if (btn != selected && !pairedButtons.Contains(btn))
             {
                 ColorBlock colors = btn.colors;
-                colors.normalColor = new Color(0.85f, 0.85f, 0.85f, 1f); // Gris claro
+                colors.normalColor = new Color(0.85f, 0.85f, 0.85f, 1f);
                 btn.colors = colors;
                 temporarilyDisabledButtons.Add(btn);
             }
@@ -244,7 +203,7 @@ public class PairingGame : MonoBehaviour
             if (!pairedButtons.Contains(btn))
             {
                 ColorBlock colors = btn.colors;
-                colors.normalColor = Color.white; // Restaurar el color a blanco
+                colors.normalColor = Color.white;
                 btn.colors = colors;
             }
         }
@@ -255,8 +214,8 @@ public class PairingGame : MonoBehaviour
     {
         btn.interactable = false;
         ColorBlock colors = btn.colors;
-        colors.normalColor = new Color(0f, 0.85f, 0f, 1f); // Verde claro
-        colors.disabledColor = new Color(0f, 0.85f, 0f, 1f); // Verde claro cuando está deshabilitado
+        colors.normalColor = new Color(0f, 0.85f, 0f, 1f);
+        colors.disabledColor = new Color(0f, 0.85f, 0f, 1f);
         btn.colors = colors;
     }
 
@@ -275,70 +234,20 @@ public class PairingGame : MonoBehaviour
 
     void CheckGameEnd()
     {
-        Debug.Log("Paired buttons count: "+pairedButtons.Count);
-        Debug.Log("Selected Pairs Size: " + selectedPairs.Count);
         if (pairedButtons.Count == selectedPairs.Count * 2)
         {
             EndGame();
         }
     }
 
-    void EndGame()
+    protected override void ResetGameSpecificUI()
     {
-        gameActive = false;
-        endPanel.SetActive(true);
-
-        minutes = Mathf.FloorToInt(timer / 60);
-        seconds = Mathf.FloorToInt(timer % 60);
-
-        var unmultiplied = (float)correctTries / totalTries;
-        accuracyRate = Mathf.RoundToInt(unmultiplied * 100);
-
-        gameActive = false;
-        
-        totalXp = Mathf.CeilToInt(score / 10f);
-        if(totalXp < 0) totalXp = 1;
-
-        if (accuracyRate > 50) accuracyTitle.text = "Good";
-        else accuracyTitle.text = "Bad";
-        accuracyText.text = accuracyRate.ToString() + "%";
-        timeText.text = minutes + ":" + seconds.ToString("D2");
-        xpText.text = totalXp.ToString() + "XP";
+        //ClearPreviousButtons();
     }
 
-
-
-
-    public void returnToMainMenu(GameObject objectToActivate)
+    private void ClearPreviousButtons()
     {
-        LevelManager.Instance.AddXP(totalXp);
-
-
-        endPanel.SetActive(false);
-        gameCanvas.SetActive(false);
-        introCanvas.SetActive(true);
-        generalCanvas.SetActive(false);
-
-        gameObject.SetActive(false);
-
-        objectToActivate.SetActive(true);
-    }
-}
-
-
-
-// Extensión para mezclar listas
-public static class ListExtensions
-{
-    private static System.Random rng = new System.Random();
-    public static void Shuffle<T>(this List<T> list)
-    {
-        int n = list.Count;
-        while (n > 1)
-        {
-            n--;
-            int k = rng.Next(n + 1);
-            (list[n], list[k]) = (list[k], list[n]);
-        }
+        foreach (Transform child in nativeColumn) Destroy(child.gameObject);
+        foreach (Transform child in translatedColumn) Destroy(child.gameObject);
     }
 }

@@ -21,6 +21,7 @@ public class ClassLabelsManager : MonoBehaviour
             foreach (var label in labelData.labels)
             {
                 classLabelMap[label.key] = label.value;
+                Debug.Log(classLabelMap[label.key] +": "+label.value);
             }
         }
         else

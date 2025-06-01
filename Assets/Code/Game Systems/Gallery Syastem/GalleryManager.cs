@@ -17,9 +17,7 @@ public class GalleryManager : MonoBehaviour
     {
         ResetGallery();
 
-
         imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
-
 
         if (!Directory.Exists(imageDirectory))
         {
@@ -30,23 +28,15 @@ public class GalleryManager : MonoBehaviour
 
         if (existingImages.Length == 0)
         {
-            string sourceDirectory = Path.Combine(Application.dataPath, "Photos");
+            Texture2D[] sourceImages = Resources.LoadAll<Texture2D>("Photos");
 
-            if (Directory.Exists(sourceDirectory))
+            foreach (Texture2D tex in sourceImages)
             {
-                string[] sourceImages = Directory.GetFiles(sourceDirectory, "*.jpg");
+                Texture2D readableTex = MakeTextureReadable(tex);
 
-                foreach (string sourcePath in sourceImages)
-                {
-                    string fileName = Path.GetFileName(sourcePath);
-                    string destPath = Path.Combine(imageDirectory, fileName);
-
-                    File.Copy(sourcePath, destPath, true);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("No se encontró la carpeta Assets/Photos.");
+                byte[] bytes = readableTex.EncodeToJPG();
+                string destPath = Path.Combine(imageDirectory, tex.name + ".jpg");
+                File.WriteAllBytes(destPath, bytes);
             }
         }
     }
@@ -74,7 +64,6 @@ public class GalleryManager : MonoBehaviour
 
             string fileName = Path.GetFileNameWithoutExtension(path);
             textComponent.text = fileName;
-            
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(galleryContainer.GetComponent<RectTransform>());
@@ -84,9 +73,27 @@ public class GalleryManager : MonoBehaviour
     private Texture2D LoadTexture(string path)
     {
         byte[] fileData = File.ReadAllBytes(path);
-        Texture2D texture = new Texture2D(75, 75);
+        Texture2D texture = new Texture2D(2, 2);
         texture.LoadImage(fileData);
         return texture;
+    }
+
+    private Texture2D MakeTextureReadable(Texture2D sourceTexture)
+    {
+        RenderTexture renderTex = RenderTexture.GetTemporary(sourceTexture.width, sourceTexture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+        Graphics.Blit(sourceTexture, renderTex);
+
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = renderTex;
+
+        Texture2D readableTexture = new Texture2D(sourceTexture.width, sourceTexture.height);
+        readableTexture.ReadPixels(new Rect(0, 0, sourceTexture.width, sourceTexture.height), 0, 0);
+        readableTexture.Apply();
+
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(renderTex);
+
+        return readableTexture;
     }
 
     private void ResetGallery()
@@ -97,5 +104,10 @@ public class GalleryManager : MonoBehaviour
         {
             Directory.Delete(path, true);
         }
+    }
+
+    public void ReturnToMainMenu(GameObject objectTOoDeactivate)
+    {
+        objectTOoDeactivate.SetActive(false);
     }
 }

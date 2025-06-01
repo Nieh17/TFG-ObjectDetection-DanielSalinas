@@ -62,10 +62,8 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
 
-        // Si el objeto no está en un DropSlot válido (no es hijo del DropSlot)
         if (transform.parent == originalParent.root)
         {
-            // Regresar la sílaba a su posición inicial
             transform.SetParent(originalParent);
             transform.localPosition = startPosition;
             SetWhite();
@@ -74,21 +72,19 @@ public class DraggableSyllable : MonoBehaviour, IBeginDragHandler, IDragHandler,
         }
     }
 
-    // Método para cambiar el color cuando está en el lugar correcto
     public void SetGreen()
     {
         if (syllableImage != null)
         {
-            syllableImage.color = Color.green; // Cambiar el color a verde
+            syllableImage.color = Color.green;
         }
     }
 
-    // Método para restablecer el color a blanco
     public void SetWhite()
     {
         if (syllableImage != null)
         {
-            syllableImage.color = Color.white; // Cambiar el color a blanco
+            syllableImage.color = Color.white;
         }
     }
 

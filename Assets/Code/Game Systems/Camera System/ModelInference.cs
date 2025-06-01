@@ -8,18 +8,17 @@ using System.Threading.Tasks;
 
 public class ModelInference : MonoBehaviour
 {
-    public NNModel modelAsset;  // Modelo importado como NNModel
+    public NNModel modelAsset;
     private IWorker worker;
-
-    //private List<string> classLabels = new List<string> { "gato", "mesa" };
 
     Dictionary<string, int> classLabelsMap;
 
     public TextMeshProUGUI predictionText;
 
-    private MissionManager missionManager;
 
-    // Cargar el modelo y preparar el worker
+    public static event System.Action<int> OnObjectPredicted;
+
+
     private void Start()
     {
         var model = ModelLoader.Load(modelAsset);
@@ -27,15 +26,27 @@ public class ModelInference : MonoBehaviour
 
         classLabelsMap = ClassLabelsManager.GetClassLabelMap();
 
-        missionManager = FindObjectOfType<MissionManager>();
     }
 
     // Función para predecir usando el modelo cargado
     public async Task<string> Predict(Texture2D inputImage)
     {
-        float startTime = Time.realtimeSinceStartup;
+
+        Color32[] pixels = inputImage.GetPixels32();
+        float[] preprocessedPixels = new float[inputImage.width * inputImage.height * 3];
+
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            // Escalar de [0, 255] a [-1, 1]
+            preprocessedPixels[i * 3 + 0] = (pixels[i].r / 127.5f) - 1.0f;
+            preprocessedPixels[i * 3 + 1] = (pixels[i].g / 127.5f) - 1.0f;
+            preprocessedPixels[i * 3 + 2] = (pixels[i].b / 127.5f) - 1.0f;
+        }
+
+
         // Convertir la imagen a Tensor
-        Tensor tensor = new Tensor(inputImage, channels: 3);
+        //Tensor tensor = new Tensor(inputImage, channels: 3);
+        Tensor tensor = new Tensor(new TensorShape(1, inputImage.height, inputImage.width, 3), preprocessedPixels);
 
         // Ejecutar la inferencia
         worker.Execute(tensor);
@@ -46,14 +57,9 @@ public class ModelInference : MonoBehaviour
         // Obtener el índice de la clase con la mayor probabilidad
         int predictedClass = output.ArgMax()[0];
 
-
-        float endTime = Time.realtimeSinceStartup;
-        Debug.Log("Total time Prediction: "+ (endTime-startTime));
-
-        Debug.Log("PREDICTED CLASS: "+predictedClass);
-
+        Debug.Log("Predicted class: "+predictedClass);
         // Notificar al MissionManager
-        missionManager?.RegisterPhotographedObject(predictedClass);
+        OnObjectPredicted?.Invoke(predictedClass);
 
 
         // Obtener el nombre de la clase correspondiente
@@ -75,7 +81,6 @@ public class ModelInference : MonoBehaviour
         return predictedClassName;
     }
 
-    // Limpiar cuando ya no se necesita el worker
     private void OnDestroy()
     {
         worker.Dispose();

@@ -16,14 +16,13 @@ public class DropSlot : MonoBehaviour, IDropHandler
 
         if (draggable != null)
         {
-            // Si la sílaba es correcta, la colocamos en el DropSlot
-            if (draggable.syllableText.text == expectedSyllable)
+            if (draggable.syllableText.text.Equals(expectedSyllable))
             {
                 draggable.transform.SetParent(transform);
-                draggable.transform.localPosition = Vector3.zero;  // Colocar en el centro del DropSlot
+                draggable.transform.localPosition = Vector3.zero;
                 draggable.resetAlpha();
-                draggable.SetGreen(); // Cambiar color a verde al estar en el lugar correcto
-                draggable.enabled = false;  // Bloquear el movimiento de la sílaba
+                draggable.SetGreen();
+                draggable.enabled = false;
 
                 currentSyllable = draggable;
 
@@ -37,3 +36,7 @@ public class DropSlot : MonoBehaviour, IDropHandler
         return currentSyllable != null;
     }
 }
+
+
+
+

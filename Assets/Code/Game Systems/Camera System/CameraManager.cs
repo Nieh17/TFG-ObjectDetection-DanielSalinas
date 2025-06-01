@@ -55,17 +55,22 @@ public class CameraManager : MonoBehaviour
                     Texture2D texture = NativeCamera.LoadImageAtPath(path, 1024);
                     if (texture != null)
                     {
+                        Texture2D readableTexture = MakeTextureReadable(texture);
+
+                        Texture2D modelInputTexture = ResizeTexture(readableTexture, 224, 224);
+
+                        displayImage.texture = modelInputTexture;
+                        
                         container.SetActive(true);
                         GetUi();
-                        displayImage.texture = texture;
                         displayImage.gameObject.SetActive(true);
 
                         if (aspectRatioFitter != null)
                         {
-                            aspectRatioFitter.aspectRatio = (float)texture.width / texture.height;
+                            aspectRatioFitter.aspectRatio = (float)modelInputTexture.width / modelInputTexture.height;
                         }
 
-                        StartCoroutine(HandlePrediction(texture));
+                        StartCoroutine(HandlePrediction(modelInputTexture));
 
                     }
                     else
@@ -108,6 +113,24 @@ public class CameraManager : MonoBehaviour
         Destroy(readableTexture);
 
         Debug.Log("Imagen guardada en: " + filePath);
+    }
+
+    Texture2D ResizeTexture(Texture2D originalTexture, int newWidth, int newHeight)
+    {
+        RenderTexture rt = RenderTexture.GetTemporary(newWidth, newHeight, 0);
+        Graphics.Blit(originalTexture, rt);
+
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = rt;
+
+        Texture2D newTexture = new Texture2D(newWidth, newHeight, TextureFormat.RGB24, false);
+        newTexture.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0, 0);
+        newTexture.Apply();
+
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(rt);
+
+        return newTexture;
     }
 
     private Texture2D MakeTextureReadable(Texture2D sourceTexture)

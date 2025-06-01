@@ -4,26 +4,33 @@ using UnityEngine.UI;
 using TMPro;
 using System.IO;
 
-public class FastTranslate : MonoBehaviour
+public class FastTranslate : GameBase
 {
+    // Atributos específicos de FastTranslate
     public Button[] optionButtons;
 
-
     [Header("General Canvas")]
-    [SerializeField] GameObject generalCanvas;
+    [SerializeField] private GameObject generalCanvas;
+    protected override GameObject GeneralCanvas => generalCanvas;
 
     [Header("Introduction")]
-    [SerializeField] GameObject introCanvas;
+    [SerializeField] private GameObject introCanvas;
+    protected override GameObject IntroCanvas => introCanvas;
 
     [Header("Game's Canvas")]
-    [SerializeField] GameObject gameCanvas;
+    [SerializeField] private GameObject gameCanvas;
+    protected override GameObject GameCanvas => gameCanvas;
+
+    [Header("End Game's Canvas")]
+    [SerializeField] private GameObject endPanel;
+    protected override GameObject EndPanel => endPanel;
+
 
     [Header("Game's Canvas Texts")]
     [SerializeField] TMP_Text wordToTranslateText;
     [SerializeField] TMP_Text scoreText;
     [SerializeField] TMP_Text timerText;
     [SerializeField] TMP_Text currentLivesText;
-
 
     [Header("Slider")]
     [SerializeField] Slider timerSlider;
@@ -32,57 +39,20 @@ public class FastTranslate : MonoBehaviour
     [Header("Time")]
     [SerializeField] float maxTime = 30f;
 
-    [Header("End Game's Canvas")]
-    [SerializeField] GameObject endPanel;
-
-    [Header("End Game's Canvas Texts")]
-    [SerializeField] TMP_Text accuracyTitle;
-    [SerializeField] TMP_Text accuracyText;
-    [SerializeField] TMP_Text timeText;
-    [SerializeField] TMP_Text xpText;
-
     private int maxWords = 5;
-
-    private int score;
-    private float timer;
-    private float timeLeft;
-    private int minutes;
-    private int seconds;
 
     private WordPair currentWord;
     public List<WordPair> availableWordPairs;
     private List<string> allTranslations = new List<string>();
-    private bool gameActive = false;
 
-    private int totalTries;
-    private int correctTries;
-    private float accuracyRate;
-    private int totalXp;
-    
-
-    void OnEnable()
+    protected override void OnEnable()
     {
-        score = 0;
-        timer = maxTime;
-        timeLeft = 0f;
-        minutes = 0;
-        seconds = 0;
-
-        allTranslations = new List<string>();
-        gameActive = false;
-
-        totalTries = 0;
-        correctTries = 0;
-        accuracyRate = 0;
-        totalXp = 0;
-
-        endPanel.SetActive(false);
-        generalCanvas.SetActive(true);
-        introCanvas.SetActive(true);
+        base.OnEnable();
+        if (scoreText) scoreText.text = "0";
         timer = maxTime;
     }
 
-    void Update()
+    protected override void Update()
     {
         if (!gameActive) return;
 
@@ -98,17 +68,13 @@ public class FastTranslate : MonoBehaviour
         }
     }
 
-    public void StartGame()
+    public override void StartGame()
     {
-        introCanvas.SetActive(false);
-        gameCanvas.SetActive(true);
-        Setup();
+        base.StartGame();
     }
 
-    async void Setup()
+    protected override async void SetupGame()
     {
-        gameActive = true;
-
         string imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
         var preparedWordPairs = await WordPreparationService.PrepareWordQueueAsync(imageDirectory, maxWords);
 
@@ -141,7 +107,7 @@ public class FastTranslate : MonoBehaviour
         }
 
         currentWord = availableWordPairs[Random.Range(0, availableWordPairs.Count)];
-        wordToTranslateText.text = currentWord.nativeWord;
+        if (wordToTranslateText) wordToTranslateText.text = currentWord.nativeWord;
 
         foreach (var button in optionButtons)
         {
@@ -173,33 +139,29 @@ public class FastTranslate : MonoBehaviour
     {
         if (!gameActive) return;
 
+        totalTries += 1;
+
         if (selectedWord == currentWord.translatedWord)
         {
             correctTries += 1;
             score += 10;
-            scoreText.text = score.ToString();
+            if (scoreText) scoreText.text = score.ToString();
             availableWordPairs.Remove(currentWord);
             NextRound();
         }
         else
         {
-            score -= 5; 
-            scoreText.text = score.ToString();
-            //timer -= 3;
-            timerText.text = Mathf.Ceil(timer).ToString();
-            timerSlider.value = timer;
+            score -= 5;
+            if (scoreText) scoreText.text = score.ToString();
+            if (timerSlider) timerSlider.value = timer;
             UpdateTimerColor();
             button.interactable = false;
 
-            //TODO RESTAR VIDA
-            LifeManager.instance.LoseLife();
-            currentLivesText.text = LifeManager.instance.currentLives.ToString();
+            base.LoseLife(currentLivesText);
+
+            if (LifeManager.instance.currentLives == 0) EndGame();
+
         }
-
-        totalTries += 1;
-
-        Debug.Log("Correct Tries: " + correctTries);
-        Debug.Log("Total Tries: " + totalTries);
     }
 
     void UpdateTimerColor()
@@ -208,54 +170,13 @@ public class FastTranslate : MonoBehaviour
 
         if (percentage > 0.5f)
         {
-            // Verde a amarillo
             timerFillImage.color = Color.Lerp(Color.yellow, Color.green, (percentage - 0.5f) * 2);
         }
         else
         {
-            // Amarillo a rojo
             timerFillImage.color = Color.Lerp(Color.red, Color.yellow, percentage * 2);
         }
     }
 
-    void EndGame()
-    {
-        endPanel.SetActive(true);
-
-        timeLeft = maxTime - timer;
-        minutes = Mathf.FloorToInt(timeLeft / 60);
-        seconds = Mathf.FloorToInt(timeLeft % 60);
-
-        var unmultiplied = (float) correctTries / totalTries;
-        accuracyRate = Mathf.RoundToInt(unmultiplied * 100);
-
-        gameActive = false;
-        totalXp = Mathf.CeilToInt(score / 10f);
-
-
-        if (accuracyRate > 50) accuracyTitle.text = "Good";
-        else accuracyTitle.text = "Bad";
-        accuracyText.text = accuracyRate.ToString()+"%"; 
-        timeText.text = minutes+":"+seconds.ToString("D2");
-        xpText.text = totalXp.ToString()+"XP";
-
-        Debug.Log("Juego terminado. Puntuación final: " + score);
-    }
-
-    public void returnToMainMenu(GameObject objectToActivate)
-    {
-
-        LevelManager.Instance.AddXP(totalXp);
-
-        scoreText.text = "0";
-
-        endPanel.SetActive(false);
-        gameCanvas.SetActive(false);
-        introCanvas.SetActive(true);
-        generalCanvas.SetActive(false);
-
-        gameObject.SetActive(false);
-
-        objectToActivate.SetActive(true);
-    }
+    protected override void ResetGameSpecificUI(){}
 }

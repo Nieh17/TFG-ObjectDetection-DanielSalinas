@@ -56,7 +56,6 @@ public class LifeManager : MonoBehaviour
         {
             currentLives--;
 
-            // Calcular la nueva regeneración correctamente
             DateTime lastRegenTime = nextLifeTimes.Count > 0 ? nextLifeTimes.Peek() : DateTime.Now;
             DateTime newRegenTime = lastRegenTime.AddMinutes(regenTimeMinutes);
             nextLifeTimes.Enqueue(newRegenTime);
@@ -84,7 +83,7 @@ public class LifeManager : MonoBehaviour
             if (timeUntilNextLife.TotalSeconds <= 0)
             {
                 currentLives++;
-                nextLifeTimes.Dequeue(); // Eliminamos la vida regenerada
+                nextLifeTimes.Dequeue();
 
                 SaveLives();
                 UpdateLivesUI();
@@ -138,7 +137,7 @@ public class LifeManager : MonoBehaviour
                     if (regenTime > DateTime.Now)
                         nextLifeTimes.Enqueue(regenTime);
                     else
-                        currentLives++; // Si ya pasó el tiempo, recuperamos la vida
+                        currentLives++;
                 }
             }
         }
@@ -165,8 +164,6 @@ public class LifeManager : MonoBehaviour
 
     private void UpdateLivesUI()
     {
-        Debug.Log("Vidas actuales: " + currentLives);
-
         for (int i = 0; i < aliveHearts.Count; i++)
         {
             aliveHearts[i].SetActive(i < currentLives);

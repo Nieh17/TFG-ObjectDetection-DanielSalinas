@@ -14,9 +14,9 @@ public class MissionManager : MonoBehaviour
     [SerializeField] Animator animator;
 
 
-    private int numberOfMissions = 2; // Número de misiones que se eligen al azar
-    private List<Mission> allMissions = new List<Mission>(); // Lista para almacenar todas las misiones
-    private List<MissionProgress> todaysMissionsProgress = new List<MissionProgress>(); // Progreso de misiones del día
+    private int numberOfMissions = 2;
+    private List<Mission> allMissions = new List<Mission>();
+    private List<MissionProgress> todaysMissionsProgress = new List<MissionProgress>();
 
     private async void Start()
     {
@@ -50,11 +50,13 @@ public class MissionManager : MonoBehaviour
     private void OnEnable()
     {
         SettingsManager.OnSettingsSaved += OnSettingsChanged;
+        ModelInference.OnObjectPredicted += RegisterPhotographedObject;
     }
 
     private void OnDisable()
     {
         SettingsManager.OnSettingsSaved -= OnSettingsChanged;
+        ModelInference.OnObjectPredicted -= RegisterPhotographedObject;
     }
 
 
@@ -74,7 +76,7 @@ public class MissionManager : MonoBehaviour
             string objectNameLocalized = await LocalizationManager.GetLearningLocalizedString(objectName);
 
             string description = missionLocalized + objectNameLocalized;
-            Debug.Log(description);
+
             allMissions.Add(new Mission(description, new List<int> { objectValue }));
         }
     }
@@ -115,12 +117,6 @@ public class MissionManager : MonoBehaviour
         PlayerPrefs.SetString("TodaysMissionDescriptions", joinedDescriptions);
 
         PlayerPrefs.Save();
-
-        // Mostrar misiones de hoy (solo para debug)
-        foreach (MissionProgress progress in todaysMissionsProgress)
-        {
-            Debug.Log("Misión de hoy: " + progress.missionDescription);
-        }
     }
 
 
@@ -131,7 +127,7 @@ public class MissionManager : MonoBehaviour
         {
             string key = "MissionProgress_" + progress.missionDescription;
             string jsonProgress = JsonUtility.ToJson(progress);
-            PlayerPrefs.SetString(key, jsonProgress); // Guardamos el progreso como un JSON
+            PlayerPrefs.SetString(key, jsonProgress);
         }
         PlayerPrefs.Save();
     }
@@ -170,19 +166,16 @@ public class MissionManager : MonoBehaviour
 
     public void RegisterPhotographedObject(int objectValue)
     {
-        Debug.Log("Entro en registered photographed object");
-        Debug.Log("Todays Mission Progress Size: " + todaysMissionsProgress.Count);
+
         foreach (MissionProgress mission in todaysMissionsProgress)
         {
             bool wasAlreadyCompleted = mission.IsMissionCompleted();
 
             mission.AddPhotographedValue(objectValue);
 
-            Debug.Log($"Misión: {mission.missionDescription} - Progreso: {mission.completionPercentage}%");
 
             if (!wasAlreadyCompleted && mission.IsMissionCompleted())
             {
-                Debug.Log("¡Misión completada! Descripción: " + mission.missionDescription);
                 GetMissionPopUp();
             }
         }
