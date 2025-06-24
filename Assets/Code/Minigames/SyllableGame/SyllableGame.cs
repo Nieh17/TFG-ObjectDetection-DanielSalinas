@@ -54,6 +54,8 @@ public class SyllableGameTwo : GameBase
 
         syllableSpawnZoneRect = syllableSpawnZone.GetComponent<RectTransform>();
         dropSlotZoneRect = dropSlotZone.GetComponent<RectTransform>();
+
+        currentLivesText.text = LifeManager.instance.currentLives.ToString();
     }
     protected override void OnEnable()
     {
@@ -252,6 +254,7 @@ public class SyllableGameTwo : GameBase
         score -= 5;
 
         base.LoseLife(currentLivesText);
+        if (LifeManager.instance.currentLives == 0) EndGame();
     }
 
     protected override void ResetGameSpecificUI()

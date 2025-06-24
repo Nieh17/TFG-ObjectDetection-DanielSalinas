@@ -40,6 +40,7 @@ public class LevelManager : MonoBehaviour
     {
         if (xpSlider != null)
         {
+            xpSlider.value = 0;
             xpSlider.maxValue = xpToNextLevel;
             xpSlider.value = currentXP;
         }
@@ -57,6 +58,8 @@ public class LevelManager : MonoBehaviour
         currentXP += amount;
         while (currentXP >= xpToNextLevel)
         {
+            Debug.Log("CURRENT EXP: " + currentXP);
+
             currentXP -= xpToNextLevel;
             currentLevel++;
             xpToNextLevel = CalculateXPForNextLevel(currentLevel);

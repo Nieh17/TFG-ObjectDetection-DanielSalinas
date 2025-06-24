@@ -47,6 +47,8 @@ public class PairingGame : GameBase
     {
         base.OnEnable();
         //ClearPreviousButtons();
+        currentLivesText.text = LifeManager.instance.currentLives.ToString();
+
     }
 
     protected override void Update()
@@ -167,6 +169,7 @@ public class PairingGame : GameBase
                 firstSelected.GetComponent<Image>().color = Color.white;
 
                 base.LoseLife(currentLivesText);
+                if (LifeManager.instance.currentLives == 0) EndGame();
             }
 
             firstSelected = null;

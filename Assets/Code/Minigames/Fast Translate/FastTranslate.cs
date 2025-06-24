@@ -50,6 +50,7 @@ public class FastTranslate : GameBase
         base.OnEnable();
         if (scoreText) scoreText.text = "0";
         timer = maxTime;
+        currentLivesText.text = LifeManager.instance.currentLives.ToString();
     }
 
     protected override void Update()

@@ -108,8 +108,9 @@ public abstract class GameBase : MonoBehaviour
 
     public void ReturnToMainMenu(GameObject objectToActivate)
     {
+        Debug.Log("EXPERIENCIA TOTAL: "+totalXp);
         LevelManager.Instance.AddXP(totalXp);
-
+        totalXp = 0;
         ResetGameSpecificUI();
 
         if (EndPanel) EndPanel.SetActive(false);

@@ -20,7 +20,7 @@ public class MissionManager : MonoBehaviour
 
     private async void Start()
     {
-        ResetMissionProgress();
+        //ResetMissionProgress();
 
         string todayDate = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
         string savedDate = PlayerPrefs.GetString("LastMissionDate", "");
@@ -83,7 +83,7 @@ public class MissionManager : MonoBehaviour
 
 
 
-    private void SelectMissions()
+    /*private void SelectMissions()
     {
         // Limpiar las misiones del día anterior
         todaysMissionsProgress.Clear();
@@ -116,6 +116,84 @@ public class MissionManager : MonoBehaviour
         string joinedDescriptions = string.Join("|", selectedDescriptions);
         PlayerPrefs.SetString("TodaysMissionDescriptions", joinedDescriptions);
 
+        PlayerPrefs.Save();
+    }*/
+    private void SelectMissions()
+    {
+        todaysMissionsProgress.Clear();
+
+        Mission requiredMission = null;
+        // Find the mission that requires objectValue 1
+        foreach (var mission in allMissions)
+        {
+            if (mission.objectValuesToPhotograph.Contains(1))
+            {
+                requiredMission = mission;
+                break;
+            }
+        }
+
+        if (requiredMission == null)
+        {
+            Debug.LogWarning("No mission found with objectValue 1. Selecting two random missions instead.");
+            // Fallback: If no mission with objectValue 1 exists, select two random ones.
+            List<Mission> availableMissionsFallback = new List<Mission>(allMissions);
+            List<string> selectedDescriptionsFallback = new List<string>();
+
+            for (int i = 0; i < numberOfMissions; i++)
+            {
+                if (availableMissionsFallback.Count == 0) break;
+
+                int index = Random.Range(0, availableMissionsFallback.Count);
+                Mission selected = availableMissionsFallback[index];
+                availableMissionsFallback.RemoveAt(index);
+
+                MissionProgress progress = new MissionProgress(selected.missionDescription, selected.objectValuesToPhotograph);
+                todaysMissionsProgress.Add(progress);
+                string key = "MissionProgress_" + progress.missionDescription;
+                string jsonProgress = JsonUtility.ToJson(progress);
+                PlayerPrefs.SetString(key, jsonProgress);
+                selectedDescriptionsFallback.Add(progress.missionDescription);
+            }
+            string joinedDescriptionsFallback = string.Join("|", selectedDescriptionsFallback);
+            PlayerPrefs.SetString("TodaysMissionDescriptions", joinedDescriptionsFallback);
+            PlayerPrefs.Save();
+            return; // Exit as missions are already selected
+        }
+
+        // Add the required mission first
+        MissionProgress requiredMissionProgress = new MissionProgress(requiredMission.missionDescription, requiredMission.objectValuesToPhotograph);
+        todaysMissionsProgress.Add(requiredMissionProgress);
+
+        // Prepare a list of available missions for the second slot, excluding the required one
+        List<Mission> availableMissionsForRandom = new List<Mission>(allMissions);
+        availableMissionsForRandom.RemoveAll(m => m.missionDescription == requiredMission.missionDescription);
+
+        // Select the second mission randomly from the remaining
+        if (availableMissionsForRandom.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availableMissionsForRandom.Count);
+            Mission randomMission = availableMissionsForRandom[randomIndex];
+            MissionProgress randomMissionProgress = new MissionProgress(randomMission.missionDescription, randomMission.objectValuesToPhotograph);
+            todaysMissionsProgress.Add(randomMissionProgress);
+        }
+        else
+        {
+            Debug.LogWarning("Not enough unique missions to select a second random mission. Only the required mission will be set.");
+        }
+
+        // Save all selected missions' progress
+        List<string> selectedDescriptions = new List<string>();
+        foreach (var progress in todaysMissionsProgress)
+        {
+            string key = "MissionProgress_" + progress.missionDescription;
+            string jsonProgress = JsonUtility.ToJson(progress);
+            PlayerPrefs.SetString(key, jsonProgress);
+            selectedDescriptions.Add(progress.missionDescription);
+        }
+
+        string joinedDescriptions = string.Join("|", selectedDescriptions);
+        PlayerPrefs.SetString("TodaysMissionDescriptions", joinedDescriptions);
         PlayerPrefs.Save();
     }
 

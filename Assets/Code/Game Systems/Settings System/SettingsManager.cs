@@ -32,7 +32,7 @@ public class SettingsManager : MonoBehaviour
         settingsContainer.SetActive(false);
 
         //ResetFirstTimeKey();
-        ResetLanguageAndSkipIntro();
+        //ResetLanguageAndSkipIntro();
 
         if (!PlayerPrefs.HasKey(FirstTimeKey))
         {

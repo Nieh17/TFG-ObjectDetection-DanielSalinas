@@ -15,7 +15,7 @@ public class GalleryManager : MonoBehaviour
 
     private void Start()
     {
-        ResetGallery();
+        //ResetGallery();
 
         imageDirectory = Path.Combine(Application.persistentDataPath, "SavedImages");
 
@@ -41,7 +41,7 @@ public class GalleryManager : MonoBehaviour
         }
     }
 
-    public void LoadGallery()
+    async public void LoadGallery()
     {
         gallery.SetActive(true);
 
@@ -62,7 +62,7 @@ public class GalleryManager : MonoBehaviour
 
             TextMeshProUGUI textComponent = newCard.transform.Find("CardText").GetComponent<TextMeshProUGUI>();
 
-            string fileName = Path.GetFileNameWithoutExtension(path);
+            string fileName = await LocalizationManager.GetLearningLocalizedString(Path.GetFileNameWithoutExtension(path));
             textComponent.text = fileName;
         }
 

@@ -23,6 +23,7 @@ public class LifeManager : MonoBehaviour
     private List<GameObject> aliveHearts;
     private Queue<DateTime> nextLifeTimes;
 
+    [SerializeField] UpdateButtonStatus updateButtonStatus;
     private void Awake()
     {
         if (instance == null)
@@ -47,6 +48,11 @@ public class LifeManager : MonoBehaviour
             StartCoroutine(RegenerateLives());
             StartCoroutine(UpdateTimerText());
         }
+        else
+        {
+            timerStringText.gameObject.SetActive(false);
+            timerNumberText.gameObject.SetActive(false);
+        }
     }
 
 
@@ -56,19 +62,31 @@ public class LifeManager : MonoBehaviour
         {
             currentLives--;
 
-            DateTime lastRegenTime = nextLifeTimes.Count > 0 ? nextLifeTimes.Peek() : DateTime.Now;
-            DateTime newRegenTime = lastRegenTime.AddMinutes(regenTimeMinutes);
+            DateTime timeForNextLife = DateTime.Now;
+            if (nextLifeTimes.Count > 0)
+            {
+                DateTime[] queuedTimes = nextLifeTimes.ToArray();
+                timeForNextLife = queuedTimes[queuedTimes.Length - 1];
+            }
+
+            DateTime newRegenTime = timeForNextLife.AddMinutes(regenTimeMinutes);
             nextLifeTimes.Enqueue(newRegenTime);
 
             SaveLives();
             UpdateLivesUI();
 
-            Debug.Log("Vida perdida. Próxima vida en: " + newRegenTime.ToString("HH:mm:ss"));
+            Debug.Log($"Vida perdida. Próxima vida en cola se recuperará en: {newRegenTime:HH:mm:ss}");
 
             if (currentLives < maxLives)
             {
+                StopAllCoroutines();
                 StartCoroutine(RegenerateLives());
                 StartCoroutine(UpdateTimerText());
+            }
+
+            if (currentLives == 0)
+            {
+                updateButtonStatus.DisableButton();
             }
         }
     }
@@ -87,9 +105,21 @@ public class LifeManager : MonoBehaviour
 
                 SaveLives();
                 UpdateLivesUI();
+
+                if (currentLives > 0)
+                {
+                    updateButtonStatus.EnableButton();
+                }
             }
 
             yield return new WaitForSeconds(1);
+        }
+        if (currentLives == maxLives)
+        {
+            StopCoroutine(UpdateTimerText());
+            timerStringText.gameObject.SetActive(false);
+            timerNumberText.gameObject.SetActive(false);
+            updateButtonStatus.EnableButton();
         }
     }
 
@@ -134,13 +164,21 @@ public class LifeManager : MonoBehaviour
                 if (long.TryParse(timeStr, out long binaryTime))
                 {
                     DateTime regenTime = DateTime.FromBinary(binaryTime);
-                    if (regenTime > DateTime.Now)
+                    if (regenTime > DateTime.Now.AddSeconds(-1))
                         nextLifeTimes.Enqueue(regenTime);
                     else
                         currentLives++;
                 }
             }
         }
+
+        while (nextLifeTimes.Count > 0 && nextLifeTimes.Peek() <= DateTime.Now && currentLives < maxLives)
+        {
+            nextLifeTimes.Dequeue();
+            currentLives++;
+        }
+
+        currentLives = Mathf.Min(currentLives, maxLives);
 
         SaveLives();
     }
@@ -171,10 +209,12 @@ public class LifeManager : MonoBehaviour
 
         if (currentLives < maxLives)
         {
-            StartCoroutine(UpdateTimerText());
+            timerStringText.gameObject.SetActive(true);
+            timerNumberText.gameObject.SetActive(true);
         }
         else
         {
+            timerStringText.gameObject.SetActive(false);
             timerNumberText.gameObject.SetActive(false);
         }
     }
